@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  validate:
+    name: Validate tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          if [ -z "$TAG" ]; then
+            echo "Invalid tag: $GITHUB_REF_NAME"
+            exit 1
+          fi
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build (${{ matrix.arch }})
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [armv7hl, aarch64, i486]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set version from tag
+        run: |
+          VER="${{ needs.validate.outputs.version }}"
+          echo "Setting version to $VER"
+
+          # rpm/sailpush.spec (needed: tarball build has no .git, so git describe won't work)
+          sed -i "s/^Version:.*/Version:    $VER/" rpm/sailpush.spec
+
+          # .pro fallback (sed changes the fallback string; git describe takes priority when available)
+          sed -i "s/isEmpty(GIT_VERSION): GIT_VERSION = \"[^\"]*\"/isEmpty(GIT_VERSION): GIT_VERSION = \"$VER\"/" sailpush.pro
+
+      - name: Build RPM
+        uses: coderus/github-sfos-build@sfos5
+        with:
+          release: 5.0.0.43
+          arch: ${{ matrix.arch }}
+
+      - name: Upload RPM
+        uses: actions/upload-artifact@v6
+        with:
+          name: sailpush-${{ matrix.arch }}
+          path: RPMS/*.rpm
+          retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download RPMs
+        uses: actions/download-artifact@v8
+        with:
+          path: release-rpms
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: SailPush v${{ needs.validate.outputs.version }}
+          files: release-rpms/**/*.rpm
+          generate_release_notes: true
