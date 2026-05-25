@@ -37,7 +37,7 @@ jobs:
       - name: Set version from tag
         run: |
           VER="${{ needs.validate.outputs.version }}"
-          RPM_VER="${VER//-/~}"
+          RPM_VER=$(echo "$VER" | sed 's/-/~/g')
           echo "Setting version to $VER (RPM: $RPM_VER)"
 
           # rpm/sailpush.spec (needed: tarball build has no .git, so git describe won't work)
