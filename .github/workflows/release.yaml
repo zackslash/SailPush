@@ -37,10 +37,12 @@ jobs:
       - name: Set version from tag
         run: |
           VER="${{ needs.validate.outputs.version }}"
-          echo "Setting version to $VER"
+          RPM_VER="${VER//-/~}"
+          echo "Setting version to $VER (RPM: $RPM_VER)"
 
           # rpm/sailpush.spec (needed: tarball build has no .git, so git describe won't work)
-          sed -i "s/^Version:.*/Version:    $VER/" rpm/sailpush.spec
+          # RPM versions cannot contain hyphens; use tilde for pre-releases (sorts before release)
+          sed -i "s/^Version:.*/Version:    $RPM_VER/" rpm/sailpush.spec
 
           # .pro fallback (sed changes the fallback string; git describe takes priority when available)
           sed -i "s/isEmpty(GIT_VERSION): GIT_VERSION = \"[^\"]*\"/isEmpty(GIT_VERSION): GIT_VERSION = \"$VER\"/" sailpush.pro
