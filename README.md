@@ -17,7 +17,7 @@ This keeps the CPU and network alive when the screen is off. Without it, notific
 Download the `.rpm` for your architecture from [Releases](https://github.com/zackslash/SailPush/releases):
 
 ```bash
-devel-su pkcon install local ./sailpush-<version>.rpm
+devel-su pkcon install-local ./sailpush-<version>.rpm
 systemctl --user daemon-reload
 systemctl --user enable --now sailpush.service
 ```
