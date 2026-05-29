@@ -3,6 +3,7 @@
 #include <QDBusReply>
 #include <QDBusConnection>
 #include <QLoggingCategory>
+#include <QRegularExpression>
 
 Q_LOGGING_CATEGORY(lcNotification, "net.sailpush.sailfish.notification")
 
@@ -28,11 +29,11 @@ void NotificationManager::publishNotification(const Message &msg, int unreadCoun
     }
 
     QString summary = msg.displayName();
-    QString body = msg.message;
+    const QString plainBody = msg.html ? stripHtml(msg.message) : msg.message;
 
     QVariantMap hints = buildHints(msg, displayOn);
-    hints.insert("x-nemo-preview-summary", msg.displayName());
-    hints.insert("x-nemo-preview-body", truncate(msg.message, 100));
+    hints.insert("x-nemo-preview-summary", summary);
+    hints.insert("x-nemo-preview-body", truncate(plainBody, 100));
     hints.insert("category", CATEGORY);
 
     if (unreadCount > 0) {
@@ -65,7 +66,7 @@ void NotificationManager::publishNotification(const Message &msg, int unreadCoun
         replacesId,
         APP_ICON,
         summary,
-        body,
+        plainBody,
         actions,
         hints,
         expireTimeout
@@ -95,6 +96,42 @@ QString NotificationManager::truncate(const QString &text, int maxLength)
 {
     if (text.length() <= maxLength) return text;
     return text.left(maxLength - 3) + "...";
+}
+
+QString NotificationManager::stripHtml(const QString &html)
+{
+    static const QRegularExpression brRe("<br\\s*/?>", QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression pRe("</p>", QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression tagRe("<[^>]*>");
+    static const QRegularExpression hexEntityRe("&#x([0-9a-fA-F]+);");
+    static const QRegularExpression decEntityRe("&#(\\d+);");
+
+    QString text = html;
+    text.replace(brRe, "\n");
+    text.replace(pRe, "\n\n");
+    text.replace(tagRe, "");
+    // Named entities
+    text.replace("&amp;", "&");
+    text.replace("&lt;", "<");
+    text.replace("&gt;", ">");
+    text.replace("&quot;", "\"");
+    text.replace("&apos;", "'");
+    text.replace("&nbsp;", " ");
+    text.replace("&copy;", "\u00A9");
+    text.replace("&mdash;", "\u2014");
+    text.replace("&ndash;", "\u2013");
+    text.replace("&hellip;", "\u2026");
+    // Numeric entities — safe to loop since replacements are single chars
+    QRegularExpressionMatch m;
+    while ((m = hexEntityRe.match(text)).hasMatch()) {
+        text.replace(m.capturedStart(), m.capturedLength(),
+                     QChar(m.captured(1).toUInt(nullptr, 16)));
+    }
+    while ((m = decEntityRe.match(text)).hasMatch()) {
+        text.replace(m.capturedStart(), m.capturedLength(),
+                     QChar(m.captured(1).toUInt()));
+    }
+    return text;
 }
 
 QVariantMap NotificationManager::buildHints(const Message &msg, bool displayOn) const

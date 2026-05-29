@@ -20,6 +20,7 @@ public:
 
     void publishNotification(const Message &msg, int unreadCount, bool displayOn);
     static QString truncate(const QString &text, int maxLength);
+    static QString stripHtml(const QString &html);
 
 signals:
     void notificationActionInvoked(const QString &messageId, const QString &action, const QString &receipt);

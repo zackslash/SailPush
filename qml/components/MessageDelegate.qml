@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "../js/HtmlUtils.js" as HtmlUtils
 
 ListItem {
     id: delegate
@@ -74,7 +75,7 @@ ListItem {
         }
 
         Label {
-            text: messageData.message || ""
+            text: messageData.html ? HtmlUtils.stripHtml(messageData.message || "") : (messageData.message || "")
             font.pixelSize: Theme.fontSizeSmall
             color: Theme.secondaryColor
             truncationMode: TruncationMode.Fade

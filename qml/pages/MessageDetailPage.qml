@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "../js/HtmlUtils.js" as HtmlUtils
 
 Page {
     id: page
@@ -61,7 +62,7 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: page.width - 2 * Theme.horizontalPageMargin
-                text: messageData.html ? stripHtml(messageData.message || "") : (messageData.message || "")
+                text: messageData.html ? HtmlUtils.stripHtml(messageData.message || "") : (messageData.message || "")
                 font.pixelSize: Theme.fontSizeMedium
                 wrapMode: Text.WordWrap
             }
@@ -115,31 +116,5 @@ Page {
         if (messageData.id && rootDaemon) {
             rootDaemon.markAsRead(messageData.id)
         }
-    }
-
-    function stripHtml(html) {
-        var text = html
-        text = text.replace(/<br\s*\/?>/gi, "\n")
-        text = text.replace(/<\/p>/gi, "\n\n")
-        text = text.replace(/<[^>]*>/g, "")
-        // Named entities
-        text = text.replace(/&amp;/g, "&")
-        text = text.replace(/&lt;/g, "<")
-        text = text.replace(/&gt;/g, ">")
-        text = text.replace(/&quot;/g, "\"")
-        text = text.replace(/&#39;|&apos;/g, "'")
-        text = text.replace(/&nbsp;/g, " ")
-        text = text.replace(/&copy;/g, "\u00A9")
-        text = text.replace(/&mdash;/g, "\u2014")
-        text = text.replace(/&ndash;/g, "\u2013")
-        text = text.replace(/&hellip;/g, "\u2026")
-        // Numeric entities: &#123; and &#x1F600;
-        text = text.replace(/&#x([0-9a-fA-F]+);/g, function(match, hex) {
-            return String.fromCharCode(parseInt(hex, 16))
-        })
-        text = text.replace(/&#(\d+);/g, function(match, dec) {
-            return String.fromCharCode(parseInt(dec, 10))
-        })
-        return text
     }
 }

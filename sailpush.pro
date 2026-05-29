@@ -39,6 +39,7 @@ DISTFILES += qml/sailpush.qml \
     qml/cover/CoverPage.qml \
     qml/pages/*.qml \
     qml/components/*.qml \
+    qml/js/*.js \
     rpm/sailpush.changes.in \
     rpm/sailpush.changes.run.in \
     rpm/sailpush.spec \
