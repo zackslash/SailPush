@@ -157,15 +157,15 @@ QStringList NotificationManager::buildActions(const Message &msg) const
 {
     QStringList actions;
     actions.append("default");
-    actions.append("Open");
+    actions.append(tr("Open"));
 
     if (msg.isEmergency() && !msg.acked) {
         actions.append("acknowledge");
-        actions.append("Acknowledge");
+        actions.append(tr("Acknowledge"));
     }
 
     actions.append("ignore");
-    actions.append("Dismiss");
+    actions.append(tr("Dismiss"));
 
     return actions;
 }

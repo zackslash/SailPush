@@ -89,7 +89,7 @@ void WebSocketManager::onTextMessageReceived(const QString &message)
     case FrameType::Error:
         qCWarning(lcWebSocket) << "Server error received";
         m_autoReconnect = false;
-        emit connectionError("Permanent server error. Please re-login.");
+        emit connectionError(QStringLiteral("Permanent server error. Please re-login."));
         break;
     case FrameType::SessionClosedByServer:
         qCWarning(lcWebSocket) << "Session closed by server (logged in elsewhere)";
@@ -117,7 +117,7 @@ void WebSocketManager::onBinaryMessageReceived(const QByteArray &message)
         break;
     case FrameType::Error:
         m_autoReconnect = false;
-        emit connectionError("Permanent server error.");
+        emit connectionError(QStringLiteral("Permanent server error."));
         break;
     case FrameType::SessionClosedByServer:
         m_autoReconnect = false;

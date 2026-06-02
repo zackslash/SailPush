@@ -50,6 +50,48 @@ DISTFILES += qml/sailpush.qml \
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
+# Translations — European languages
+TRANSLATIONS += \
+    translations/sailpush_de.ts \
+    translations/sailpush_fr.ts \
+    translations/sailpush_es.ts \
+    translations/sailpush_it.ts \
+    translations/sailpush_pt.ts \
+    translations/sailpush_nl.ts \
+    translations/sailpush_sv.ts \
+    translations/sailpush_nb.ts \
+    translations/sailpush_da.ts \
+    translations/sailpush_fi.ts \
+    translations/sailpush_is.ts \
+    translations/sailpush_pl.ts \
+    translations/sailpush_cs.ts \
+    translations/sailpush_sk.ts \
+    translations/sailpush_hu.ts \
+    translations/sailpush_ro.ts \
+    translations/sailpush_hr.ts \
+    translations/sailpush_sr.ts \
+    translations/sailpush_sl.ts \
+    translations/sailpush_bg.ts \
+    translations/sailpush_el.ts \
+    translations/sailpush_tr.ts \
+    translations/sailpush_et.ts \
+    translations/sailpush_lv.ts \
+    translations/sailpush_lt.ts \
+    translations/sailpush_sq.ts \
+    translations/sailpush_mk.ts \
+    translations/sailpush_bs.ts \
+    translations/sailpush_mt.ts \
+    translations/sailpush_ga.ts \
+    translations/sailpush_cy.ts \
+    translations/sailpush_eu.ts \
+    translations/sailpush_ca.ts \
+    translations/sailpush_gl.ts \
+    translations/sailpush_uk.ts \
+    translations/sailpush_ru.ts \
+    translations/sailpush_be.ts \
+    translations/sailpush_hy.ts \
+    translations/sailpush_ka.ts
+
 systemd_service.path = /usr/lib/systemd/user
 systemd_service.files = systemd/sailpush.service
 INSTALLS += systemd_service

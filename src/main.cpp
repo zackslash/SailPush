@@ -13,6 +13,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QStandardPaths>
+#include <QTranslator>
+#include <QLocale>
 #include "loginhelper.h"
 #include "daemon.h"
 #include "sailpushclient.h"
@@ -20,6 +22,27 @@
 Q_LOGGING_CATEGORY(lcMain, "net.sailpush.sailfish.main")
 
 static const QString DBUS_SERVICE = "net.sailpush.Sailfish";
+
+static void loadTranslations(QCoreApplication *app)
+{
+    QLocale locale = QLocale::system();
+    auto *translator = new QTranslator(app);
+    QString transDir = SailfishApp::pathTo("translations").toLocalFile();
+    if (translator->load(locale.name(), "sailpush", "_", transDir)) {
+        app->installTranslator(translator);
+        qCInfo(lcMain) << "Loaded translations for" << locale.name();
+    } else {
+        // Try language-only (e.g. "de" from "de_DE")
+        QString lang = locale.name().left(locale.name().indexOf('_'));
+        if (!lang.isEmpty() && translator->load(lang, "sailpush", "_", transDir)) {
+            app->installTranslator(translator);
+            qCInfo(lcMain) << "Loaded translations for" << lang;
+        } else {
+            qCInfo(lcMain) << "No translations found for" << locale.name() << "- using English";
+            delete translator;
+        }
+    }
+}
 
 int runDaemon(int argc, char *argv[]);
 
@@ -62,6 +85,7 @@ int main(int argc, char *argv[])
     }
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+    loadTranslations(app.data());
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 
     LoginHelper *loginHelper = new LoginHelper(view.data());
@@ -118,6 +142,7 @@ int main(int argc, char *argv[])
 int runDaemon(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
+    loadTranslations(&app);
     QLoggingCategory::setFilterRules("net.sailpush.sailfish.*=true");
 
     // Log to file AND stderr for debugging

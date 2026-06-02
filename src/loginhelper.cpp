@@ -114,8 +114,8 @@ void LoginHelper::onDeviceRegistered(const QString &deviceId)
         emit credentialsChanged();
         emit credentialsSaved();
     } else {
-        setErrorString("Failed to save credentials");
-        emit loginFailed("Failed to save credentials");
+        setErrorString(tr("Failed to save credentials"));
+        emit loginFailed(tr("Failed to save credentials"));
     }
 
     m_pendingUserKey.clear();

@@ -267,7 +267,7 @@ void Daemon::onMessagesDownloadFailed(const QString &error)
 
     // Detect invalid credentials (Pushover returns 401/403 for bad secret/device)
     if (error.contains("credentials rejected", Qt::CaseInsensitive)) {
-        m_credentialError = "Credentials rejected by server. Please re-login.";
+        m_credentialError = tr("Credentials rejected by server. Please re-login.");
         qCWarning(lcDaemon) << m_credentialError;
         // Clear stored credentials so UI shows login page
         m_credentials->clear();
@@ -343,7 +343,7 @@ void Daemon::onWsError(const QString &error)
 {
     qCWarning(lcDaemon) << "WebSocket error:" << error;
     if (error.contains("Permanent", Qt::CaseInsensitive) || error.contains("re-login", Qt::CaseInsensitive)) {
-        m_credentialError = "Session expired. Please re-login.";
+        m_credentialError = tr("Session expired. Please re-login.");
         qCWarning(lcDaemon) << m_credentialError;
         // Clear stored credentials so UI shows login page
         m_credentials->clear();

@@ -145,11 +145,11 @@ void SailPushClient::onReplyFinished(QNetworkReply *reply)
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
         qCWarning(lcSailPushClient) << "JSON parse error:" << parseError.errorString();
-        if (action == "login") emit loginFailed("Invalid server response");
-        else if (action == "register") emit deviceRegistrationFailed("Invalid server response");
-        else if (action == "download") emit messagesDownloadFailed("Invalid server response");
-        else if (action == "delete") emit messageDeleteFailed("Invalid server response");
-        else if (action == "acknowledge") emit emergencyAckFailed("Invalid server response");
+        if (action == "login") emit loginFailed(tr("Invalid server response"));
+        else if (action == "register") emit deviceRegistrationFailed(tr("Invalid server response"));
+        else if (action == "download") emit messagesDownloadFailed(tr("Invalid server response"));
+        else if (action == "delete") emit messageDeleteFailed(tr("Invalid server response"));
+        else if (action == "acknowledge") emit emergencyAckFailed(tr("Invalid server response"));
         return;
     }
 
@@ -170,7 +170,7 @@ void SailPushClient::onReplyFinished(QNetworkReply *reply)
                 if (!errorStr.isEmpty()) errorStr += "; ";
                 errorStr += e.toString();
             }
-            emit loginFailed(errorStr.isEmpty() ? "Login failed" : errorStr);
+            emit loginFailed(errorStr.isEmpty() ? tr("Login failed") : errorStr);
         }
     } else if (action == "register") {
         if (status == 1) {
@@ -182,7 +182,7 @@ void SailPushClient::onReplyFinished(QNetworkReply *reply)
                 if (!errorStr.isEmpty()) errorStr += "; ";
                 errorStr += e.toString();
             }
-            emit deviceRegistrationFailed(errorStr.isEmpty() ? "Registration failed" : errorStr);
+            emit deviceRegistrationFailed(errorStr.isEmpty() ? tr("Registration failed") : errorStr);
         }
     } else if (action == "download") {
         if (status == 1) {
@@ -199,7 +199,7 @@ void SailPushClient::onReplyFinished(QNetworkReply *reply)
                 if (!errorStr.isEmpty()) errorStr += "; ";
                 errorStr += e.toString();
             }
-            emit messagesDownloadFailed(errorStr.isEmpty() ? "Download failed" : errorStr);
+            emit messagesDownloadFailed(errorStr.isEmpty() ? tr("Download failed") : errorStr);
         }
     } else if (action == "delete") {
         if (status == 1) {
@@ -211,7 +211,7 @@ void SailPushClient::onReplyFinished(QNetworkReply *reply)
                 if (!errorStr.isEmpty()) errorStr += "; ";
                 errorStr += e.toString();
             }
-            emit messageDeleteFailed(errorStr.isEmpty() ? "Delete failed" : errorStr);
+            emit messageDeleteFailed(errorStr.isEmpty() ? tr("Delete failed") : errorStr);
         }
     } else if (action == "acknowledge") {
         if (status == 1) {
@@ -223,7 +223,7 @@ void SailPushClient::onReplyFinished(QNetworkReply *reply)
                 if (!errorStr.isEmpty()) errorStr += "; ";
                 errorStr += e.toString();
             }
-            emit emergencyAckFailed(errorStr.isEmpty() ? "Acknowledge failed" : errorStr);
+            emit emergencyAckFailed(errorStr.isEmpty() ? tr("Acknowledge failed") : errorStr);
         }
     }
 }

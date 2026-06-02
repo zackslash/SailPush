@@ -13,6 +13,9 @@ SRPMS/
 debug/
 release/
 
+# Compiled translations
+*.qm
+
 # IDE
 .idea/
 .vscode/

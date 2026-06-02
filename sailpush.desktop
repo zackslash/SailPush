@@ -4,7 +4,6 @@ X-Nemo-Application-Type=silica-qt5
 Icon=sailpush
 Exec=/usr/bin/invoker --type=silica-qt5 /usr/bin/sailpush
 Name=SailPush
-Name[de]=SailPush
 
 [X-Sailjail]
 OrganizationName=net.sailpush
