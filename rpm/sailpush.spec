@@ -67,7 +67,7 @@ ln -sf ../sailpush.service %{buildroot}%{_userunitdir}/user-session.target.wants
 %{_userunitdir}/sailpush.service
 %{_userunitdir}/user-session.target.wants/sailpush.service
 %{_datadir}/lipstick/notificationcategories/x-sailpush.conf
-%{_datadir}/dbus-1/services/net.sailpush.Sailfish.service
+%{_datadir}/dbus-1/services/com.zackslash.sailpush.service
 
 %post
 systemctl --user daemon-reload

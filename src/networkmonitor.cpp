@@ -3,7 +3,7 @@
 #include <QDBusReply>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcNetworkMonitor, "net.sailpush.sailfish.network")
+Q_LOGGING_CATEGORY(lcNetworkMonitor, "com.zackslash.sailpush.network")
 
 NetworkMonitor::NetworkMonitor(QObject *parent)
     : QObject(parent)

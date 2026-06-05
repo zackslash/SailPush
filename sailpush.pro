@@ -46,7 +46,7 @@ DISTFILES += qml/sailpush.qml \
     sailpush.desktop \
     systemd/sailpush.service \
     notifications/x-sailpush.conf \
-    dbus-1/net.sailpush.Sailfish.service
+    dbus-1/com.zackslash.sailpush.service
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
@@ -101,5 +101,5 @@ notification_category.files = notifications/x-sailpush.conf
 INSTALLS += notification_category
 
 dbus_service.path = /usr/share/dbus-1/services
-dbus_service.files = dbus-1/net.sailpush.Sailfish.service
+dbus_service.files = dbus-1/com.zackslash.sailpush.service
 INSTALLS += dbus_service

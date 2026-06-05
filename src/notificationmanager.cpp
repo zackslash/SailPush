@@ -5,7 +5,7 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
-Q_LOGGING_CATEGORY(lcNotification, "net.sailpush.sailfish.notification")
+Q_LOGGING_CATEGORY(lcNotification, "com.zackslash.sailpush.notification")
 
 static const QString DBUS_SERVICE = QStringLiteral("org.freedesktop.Notifications");
 static const QString DBUS_PATH = QStringLiteral("/org/freedesktop/Notifications");

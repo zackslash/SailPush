@@ -8,7 +8,7 @@
 #include <QLoggingCategory>
 #include <QTimer>
 
-Q_LOGGING_CATEGORY(lcSailPushClient, "net.sailpush.sailfish.client")
+Q_LOGGING_CATEGORY(lcSailPushClient, "com.zackslash.sailpush.client")
 
 #ifdef GIT_VERSION
 static const QString APP_VERSION = QStringLiteral(GIT_VERSION);

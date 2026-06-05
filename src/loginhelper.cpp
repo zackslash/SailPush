@@ -2,7 +2,7 @@
 #include "daemon.h"
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcLoginHelper, "net.sailpush.sailfish.login")
+Q_LOGGING_CATEGORY(lcLoginHelper, "com.zackslash.sailpush.login")
 
 static QString generateDeviceName()
 {

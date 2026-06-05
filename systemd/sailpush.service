@@ -8,7 +8,7 @@ Type=simple
 ExecStart=/usr/bin/invoker --type=generic /usr/bin/sailpush --daemon
 Restart=on-failure
 RestartSec=5
-Environment=QT_LOGGING_RULES=net.sailpush.sailfish.*=true
+Environment=QT_LOGGING_RULES=com.zackslash.sailpush.*=true
 
 [Install]
 WantedBy=user-session.target

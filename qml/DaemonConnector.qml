@@ -17,9 +17,9 @@ Item {
 
     DBusInterface {
         id: daemonInterface
-        service: "net.sailpush.Sailfish"
-        path: "/net/sailpush/Sailfish"
-        iface: "net.sailpush.Sailfish"
+        service: "com.zackslash.sailpush"
+        path: "/com/zackslash/sailpush"
+        iface: "com.zackslash.sailpush"
         signalsEnabled: true
     }
 
@@ -108,7 +108,7 @@ Item {
 
         function onSignalReceived(signalName, args) {
             if (signalName === "NameOwnerChanged") {
-                if (args[0] === "net.sailpush.Sailfish") {
+                if (args[0] === "com.zackslash.sailpush") {
                     // args[1] = old owner, args[2] = new owner
                     if (args[2].length > 0) {
                         // New owner appeared — daemon started

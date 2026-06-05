@@ -10,7 +10,7 @@
 #include <QMessageAuthenticationCode>
 #include <QUuid>
 
-Q_LOGGING_CATEGORY(lcCredentialStore, "net.sailpush.sailfish.credentials")
+Q_LOGGING_CATEGORY(lcCredentialStore, "com.zackslash.sailpush.credentials")
 
 static const QString CREDENTIALS_FILE = QStringLiteral("credentials.json");
 static const int IV_SIZE = 16;

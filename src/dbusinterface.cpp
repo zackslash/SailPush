@@ -4,7 +4,7 @@
 #include <QLoggingCategory>
 #include <QProcess>
 
-Q_LOGGING_CATEGORY(lcDbus, "net.sailpush.sailfish.dbus")
+Q_LOGGING_CATEGORY(lcDbus, "com.zackslash.sailpush.dbus")
 
 DbusInterface::DbusInterface(MessageStore *store, WebSocketManager *wsManager, QObject *parent)
     : QObject(parent)

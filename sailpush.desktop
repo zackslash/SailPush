@@ -6,10 +6,10 @@ Exec=/usr/bin/invoker --type=silica-qt5 /usr/bin/sailpush
 Name=SailPush
 
 [X-Sailjail]
-OrganizationName=net.sailpush
-ApplicationName=sailfish
+OrganizationName=com.zackslash
+ApplicationName=sailpush
 Permissions=Internet;AppLaunch;UserDirs;Audio
 Sandboxing=Disabled
 
 [X-HarbourBackup]
-BackupPathList=.local/share/net.sailpush/sailfish/
+BackupPathList=.local/share/com.zackslash/sailpush/

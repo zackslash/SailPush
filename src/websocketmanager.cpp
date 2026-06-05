@@ -1,7 +1,7 @@
 #include "websocketmanager.h"
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcWebSocket, "net.sailpush.sailfish.websocket")
+Q_LOGGING_CATEGORY(lcWebSocket, "com.zackslash.sailpush.websocket")
 
 WebSocketManager::WebSocketManager(QObject *parent)
     : QObject(parent)

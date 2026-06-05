@@ -7,7 +7,7 @@
 #include <QUrl>
 #include <QTimer>
 
-Q_LOGGING_CATEGORY(lcSoundPlayer, "net.sailpush.sailfish.sound")
+Q_LOGGING_CATEGORY(lcSoundPlayer, "com.zackslash.sailpush.sound")
 
 SoundPlayer::SoundPlayer(QObject *parent)
     : QObject(parent)

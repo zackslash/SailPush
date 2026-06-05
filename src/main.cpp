@@ -19,9 +19,9 @@
 #include "daemon.h"
 #include "sailpushclient.h"
 
-Q_LOGGING_CATEGORY(lcMain, "net.sailpush.sailfish.main")
+Q_LOGGING_CATEGORY(lcMain, "com.zackslash.sailpush.main")
 
-static const QString DBUS_SERVICE = "net.sailpush.Sailfish";
+static const QString DBUS_SERVICE = "com.zackslash.sailpush";
 
 static void loadTranslations(QCoreApplication *app)
 {
@@ -143,12 +143,12 @@ int runDaemon(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     loadTranslations(&app);
-    QLoggingCategory::setFilterRules("net.sailpush.sailfish.*=true");
+    QLoggingCategory::setFilterRules("com.zackslash.sailpush.*=true");
 
     // Log to file AND stderr for debugging
     // (daemon runs as systemd service — logs go to journald; file accessible via file manager)
     QString logPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
-                      + "/net.sailpush/sailfish/daemon.log";
+                      + "/com.zackslash/sailpush/daemon.log";
     QDir().mkpath(QFileInfo(logPath).absolutePath());
     static FILE *logFile = fopen(logPath.toLocal8Bit().constData(), "a");
     if (logFile) {

@@ -35,7 +35,7 @@ mb2 build             # RPM build
 
 ## Architecture
 
-Two-process model: **UI** (QML) communicates with **daemon** (background, systemd) over D-Bus (`net.sailpush.Sailfish`). The daemon maintains a persistent WebSocket to Pushover servers and handles notifications.
+Two-process model: **UI** (QML) communicates with **daemon** (background, systemd) over D-Bus (`com.zackslash.sailpush`). The daemon maintains a persistent WebSocket to Pushover servers and handles notifications.
 
 ## License
 

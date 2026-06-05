@@ -3,7 +3,7 @@
 #include <QLoggingCategory>
 #include <QDir>
 
-Q_LOGGING_CATEGORY(lcDaemon, "net.sailpush.sailfish.daemon")
+Q_LOGGING_CATEGORY(lcDaemon, "com.zackslash.sailpush.daemon")
 
 static const int WS_DISCONNECT_TIMEOUT_MS = 30000;
 static const int DEFAULT_POLLING_INTERVAL_MS = 5 * 60 * 1000;
@@ -11,13 +11,13 @@ static const int DEFAULT_POLLING_INTERVAL_MS = 5 * 60 * 1000;
 QString Daemon::dataPath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
-           + "/net.sailpush/sailfish";
+           + "/com.zackslash/sailpush";
 }
 
 QString Daemon::cachePath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation)
-           + "/net.sailpush/sailfish";
+           + "/com.zackslash/sailpush";
 }
 
 Daemon::Daemon(QObject *parent)
@@ -126,7 +126,7 @@ void Daemon::stop()
 
 void Daemon::loadSettings()
 {
-    QSettings settings("net.sailpush", "sailfish");
+    QSettings settings("com.zackslash", "sailpush");
 
     m_pollingEnabled = settings.value("pollingFallback", true).toBool();
     int intervalIndex = settings.value("pollingIntervalIndex", 1).toInt();

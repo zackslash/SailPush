@@ -15,7 +15,7 @@ Page {
 
     ConfigurationGroup {
         id: settings
-        path: "/apps/net.sailpush/sailfish"
+        path: "/apps/com.zackslash/sailpush"
     }
 
     function _pushSettingsToDaemon() {

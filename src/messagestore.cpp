@@ -7,7 +7,7 @@
 #include <QLoggingCategory>
 #include <QFileInfo>
 
-Q_LOGGING_CATEGORY(lcMessageStore, "net.sailpush.sailfish.store")
+Q_LOGGING_CATEGORY(lcMessageStore, "com.zackslash.sailpush.store")
 
 MessageStore::MessageStore(const QString &dataPath, QObject *parent)
     : QObject(parent)

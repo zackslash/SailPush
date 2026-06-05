@@ -1,3 +1,3 @@
 [D-Bus Service]
-Name=net.sailpush.Sailfish
+Name=com.zackslash.sailpush
 Exec=/usr/bin/sailpush --daemon

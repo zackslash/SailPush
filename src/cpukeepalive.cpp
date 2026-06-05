@@ -4,7 +4,7 @@
 #include <QLoggingCategory>
 #include <QUuid>
 
-Q_LOGGING_CATEGORY(lcCpuKeepalive, "net.sailpush.sailfish.keepalive")
+Q_LOGGING_CATEGORY(lcCpuKeepalive, "com.zackslash.sailpush.keepalive")
 
 CpuKeepalive::CpuKeepalive(QObject *parent)
     : QObject(parent)
@@ -23,7 +23,7 @@ CpuKeepalive::~CpuKeepalive()
 void CpuKeepalive::start()
 {
     if (m_refCount == 0) {
-        QString name = "net.sailpush.sailfish." + QUuid::createUuid().toString().mid(1, 8);
+        QString name = "com.zackslash.sailpush." + QUuid::createUuid().toString().mid(1, 8);
         QDBusInterface mce("com.nokia.mce", "/com/nokia/mce/request",
                            "com.nokia.mce.request", m_conn);
         if (mce.isValid()) {

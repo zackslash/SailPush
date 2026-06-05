@@ -9,15 +9,15 @@
 
 class DbusInterface : public QObject {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "net.sailpush.Sailfish")
+    Q_CLASSINFO("D-Bus Interface", "com.zackslash.sailpush")
     Q_PROPERTY(int unreadCount READ unreadCount NOTIFY unreadCountChanged)
     Q_PROPERTY(QString connectionState READ connectionState NOTIFY connectionStateChanged)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
 
 public:
-    static constexpr const char *SERVICE_NAME = "net.sailpush.Sailfish";
-    static constexpr const char *OBJECT_PATH = "/net/sailpush/Sailfish";
-    static constexpr const char *INTERFACE_NAME = "net.sailpush.Sailfish";
+    static constexpr const char *SERVICE_NAME = "com.zackslash.sailpush";
+    static constexpr const char *OBJECT_PATH = "/com/zackslash/sailpush";
+    static constexpr const char *INTERFACE_NAME = "com.zackslash.sailpush";
 
     explicit DbusInterface(MessageStore *store, WebSocketManager *wsManager, QObject *parent = nullptr);
 
