@@ -137,5 +137,5 @@ void TestWebSocketManager::testConstants()
     QCOMPARE(WebSocketManager::RECONNECT_MAX_MS, 300000);
 }
 
-// tst_websocketmanager.cpp - TestWebSocketManager class implementation
+QTEST_MAIN(TestWebSocketManager)
 #include "tst_websocketmanager.moc"
