@@ -121,15 +121,14 @@ int main(int argc, char *argv[])
     } else {
         // Daemon is running — check if its version matches ours.
         // After an RPM update, the old daemon may still be running with stale code.
-        // For dev builds (no git tags), always restart to pick up latest changes.
+        // For dev builds, version includes a build timestamp that changes on each rebuild.
         QDBusInterface versionCheck(DBUS_SERVICE, "/com/zackslash/sailpush",
                                     DBUS_SERVICE, sessionBus);
         QDBusReply<QString> daemonVersion = versionCheck.call("GetVersion");
         QString uiVersion = QStringLiteral(GIT_VERSION);
         bool versionMismatch = !daemonVersion.isValid() || daemonVersion.value() != uiVersion;
-        bool isDevBuild = (uiVersion == QStringLiteral("dev"));
 
-        if (versionMismatch || isDevBuild) {
+        if (versionMismatch) {
             qCInfo(lcMain) << "Daemon version mismatch: daemon="
                            << (daemonVersion.isValid() ? daemonVersion.value() : "<old/invalid>")
                            << "ui=" << uiVersion << "— restarting daemon";

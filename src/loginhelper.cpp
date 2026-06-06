@@ -1,4 +1,5 @@
 #include "loginhelper.h"
+#include "credentialstore.h"
 #include "daemon.h"
 #include <QLoggingCategory>
 
@@ -19,11 +20,13 @@ LoginHelper::LoginHelper(QObject *parent)
 {
     QString secret, deviceId, userKey, deviceName;
     if (!m_store->load(secret, deviceId, userKey, deviceName)) {
-        CredentialStore::LoadError err = m_store->lastError();
-        if (err == CredentialStore::LoadError::OldFormat) {
+        ICredentialStore::LoadError err = m_store->lastError();
+        if (err == ICredentialStore::LoadError::InvalidFormat) {
             m_migrationReason = tr("App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.");
-        } else if (err == CredentialStore::LoadError::DecryptionFailed) {
+        } else if (err == ICredentialStore::LoadError::DecryptionFailed) {
             m_migrationReason = tr("Saved credentials could not be decrypted. This can happen after a system update. Please log in again.");
+        } else if (err == ICredentialStore::LoadError::BackendUnavailable) {
+            m_migrationReason = tr("Secrets service is not available. Please restart the device and try again.");
         }
     }
 

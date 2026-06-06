@@ -2,11 +2,12 @@ TARGET = sailpush
 
 CONFIG += sailfishapp
 QT += core gui quick qml network websockets dbus multimedia
+PKGCONFIG += sailfishsecrets
 
 # Auto-detect version from git. CI builds (tarball, no .git) use sed-replaced
 # fallback in source; local dev builds get "v0.9.0-42-gabc1234" style strings.
 GIT_VERSION = $$system(git describe --tags --always 2>/dev/null)
-isEmpty(GIT_VERSION): GIT_VERSION = "dev"
+isEmpty(GIT_VERSION): GIT_VERSION = dev-$$system(git rev-parse --short HEAD 2>/dev/null)-$$system(date +%s)
 DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\"
 
 SOURCES += src/main.cpp \
@@ -23,10 +24,11 @@ SOURCES += src/main.cpp \
            src/soundplayer.cpp
 
 HEADERS += src/message.h \
+           src/icredentialstore.h \
+           src/credentialstore.h \
            src/sailpushclient.h \
            src/websocketmanager.h \
            src/messagestore.h \
-           src/credentialstore.h \
            src/dbusinterface.h \
            src/notificationmanager.h \
            src/networkmonitor.h \

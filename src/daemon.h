@@ -9,7 +9,7 @@
 #include "sailpushclient.h"
 #include "websocketmanager.h"
 #include "messagestore.h"
-#include "credentialstore.h"
+#include "icredentialstore.h"
 #include "dbusinterface.h"
 #include "notificationmanager.h"
 #include "networkmonitor.h"
@@ -67,7 +67,7 @@ private:
     SailPushClient *m_client;
     WebSocketManager *m_wsManager;
     MessageStore *m_store;
-    CredentialStore *m_credentials;
+    ICredentialStore *m_credentials;
     DbusInterface *m_dbus;
     NotificationManager *m_notificationManager;
     NetworkMonitor *m_networkMonitor;

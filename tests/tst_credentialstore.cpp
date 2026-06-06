@@ -3,7 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
-#include "credentialstore.h"
+#include "filecredentialstore.h"
 
 class TestCredentialStore : public QObject {
     Q_OBJECT
@@ -19,20 +19,19 @@ private slots:
     void testEmptyValues();
     void testLoadNonexistent();
     void testLastErrorNoneOnSuccess();
-    void testLastErrorFileNotFound();
-    void testLastErrorOldFormat();
+    void testLastErrorSecretNotFound();
+    void testLastErrorInvalidFormat();
     void testFilePermissionsAfterSave();
 
 private:
     QTemporaryDir m_tempDir;
-    CredentialStore *m_store;
+    FileCredentialStore *m_store;
 };
 
 void TestCredentialStore::init()
 {
-    // Clear any leftover credentials from previous test
     QFile::remove(m_tempDir.path() + "/credentials.json");
-    m_store = new CredentialStore(m_tempDir.path(), this);
+    m_store = new FileCredentialStore(m_tempDir.path(), this);
 }
 
 void TestCredentialStore::cleanup()
@@ -92,8 +91,6 @@ void TestCredentialStore::testOverwrite()
 
 void TestCredentialStore::testEmptyValues()
 {
-    // Empty strings cannot be encrypted — save succeeds but load will fail
-    // because HMAC verification fails on empty ciphertext
     m_store->save("", "", "", "");
 
     QString secret, deviceId, userKey, deviceName;
@@ -102,10 +99,10 @@ void TestCredentialStore::testEmptyValues()
 
 void TestCredentialStore::testLoadNonexistent()
 {
-    CredentialStore *emptyStore = new CredentialStore("/nonexistent/path/that/does/not/exist", this);
+    FileCredentialStore *emptyStore = new FileCredentialStore("/nonexistent/path/that/does/not/exist", this);
     QString secret, deviceId, userKey, deviceName;
     QVERIFY(!emptyStore->load(secret, deviceId, userKey, deviceName));
-    QCOMPARE(emptyStore->lastError(), CredentialStore::LoadError::FileNotFound);
+    QCOMPARE(emptyStore->lastError(), FileCredentialStore::LoadError::SecretNotFound);
     delete emptyStore;
 }
 
@@ -115,19 +112,18 @@ void TestCredentialStore::testLastErrorNoneOnSuccess()
 
     QString secret, deviceId, userKey, deviceName;
     QVERIFY(m_store->load(secret, deviceId, userKey, deviceName));
-    QCOMPARE(m_store->lastError(), CredentialStore::LoadError::None);
+    QCOMPARE(m_store->lastError(), FileCredentialStore::LoadError::None);
 }
 
-void TestCredentialStore::testLastErrorFileNotFound()
+void TestCredentialStore::testLastErrorSecretNotFound()
 {
     QString secret, deviceId, userKey, deviceName;
     QVERIFY(!m_store->load(secret, deviceId, userKey, deviceName));
-    QCOMPARE(m_store->lastError(), CredentialStore::LoadError::FileNotFound);
+    QCOMPARE(m_store->lastError(), FileCredentialStore::LoadError::SecretNotFound);
 }
 
-void TestCredentialStore::testLastErrorOldFormat()
+void TestCredentialStore::testLastErrorInvalidFormat()
 {
-    // Write a v1-format credentials file (version < 2)
     QJsonObject obj;
     obj.insert("version", 1);
     obj.insert("secret", "encrypted");
@@ -144,14 +140,13 @@ void TestCredentialStore::testLastErrorOldFormat()
 
     QString secret, deviceId, userKey, deviceName;
     QVERIFY(!m_store->load(secret, deviceId, userKey, deviceName));
-    QCOMPARE(m_store->lastError(), CredentialStore::LoadError::OldFormat);
+    QCOMPARE(m_store->lastError(), FileCredentialStore::LoadError::InvalidFormat);
 }
 
 void TestCredentialStore::testFilePermissionsAfterSave()
 {
     m_store->save("secret", "device", "user", "name");
     QFile::Permissions perms = QFile::permissions(m_tempDir.path() + "/credentials.json");
-    // Qt expands ReadOwner/WriteOwner to include ReadUser/WriteUser in the getter
     QFile::Permissions expected = QFile::ReadOwner | QFile::WriteOwner
                                 | QFile::ReadUser | QFile::WriteUser;
     QCOMPARE(perms, expected);
