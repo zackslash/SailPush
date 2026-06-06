@@ -49,6 +49,7 @@ public slots:
     Q_SCRIPTABLE QString GetPendingOpenMessage();
     Q_SCRIPTABLE void Quit();
     Q_SCRIPTABLE QString GetDiagnostics();
+    Q_SCRIPTABLE QString GetVersion();
 
     // Internal (not exported to D-Bus)
     void onMessageReceived(const Message &msg);

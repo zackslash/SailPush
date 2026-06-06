@@ -7,6 +7,7 @@
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
 #include <QDBusReply>
+#include <QDBusInterface>
 #include <QTimer>
 #include <QProcess>
 #include <QDateTime>
@@ -118,7 +119,39 @@ int main(int argc, char *argv[])
             }
         });
     } else {
-        qCInfo(lcMain) << "Daemon already running";
+        // Daemon is running — check if its version matches ours.
+        // After an RPM update, the old daemon may still be running with stale code.
+        // For dev builds (no git tags), always restart to pick up latest changes.
+        QDBusInterface versionCheck(DBUS_SERVICE, "/com/zackslash/sailpush",
+                                    DBUS_SERVICE, sessionBus);
+        QDBusReply<QString> daemonVersion = versionCheck.call("GetVersion");
+        QString uiVersion = QStringLiteral(GIT_VERSION);
+        bool versionMismatch = !daemonVersion.isValid() || daemonVersion.value() != uiVersion;
+        bool isDevBuild = (uiVersion == QStringLiteral("dev"));
+
+        if (versionMismatch || isDevBuild) {
+            qCInfo(lcMain) << "Daemon version mismatch: daemon="
+                           << (daemonVersion.isValid() ? daemonVersion.value() : "<old/invalid>")
+                           << "ui=" << uiVersion << "— restarting daemon";
+            QDBusInterface quitCall(DBUS_SERVICE, "/com/zackslash/sailpush",
+                                    DBUS_SERVICE, sessionBus);
+            quitCall.call("Quit");
+            // Give the old daemon a moment to shut down, then start the new one.
+            // If D-Bus activation fails, fall back to direct launch.
+            QTimer::singleShot(500, [sessionIface]() {
+                if (sessionIface) {
+                    sessionIface->startService(DBUS_SERVICE);
+                }
+                QTimer::singleShot(2000, [sessionIface]() {
+                    if (!isDaemonRegistered(sessionIface)) {
+                        qCWarning(lcMain) << "Daemon restart: D-Bus activation failed, launching directly";
+                        startDaemonDirect(sessionIface);
+                    }
+                });
+            });
+        } else {
+            qCInfo(lcMain) << "Daemon already running (version" << daemonVersion.value() << ")";
+        }
     }
 
     view->rootContext()->setContextProperty("daemonMessages", QVariantList());

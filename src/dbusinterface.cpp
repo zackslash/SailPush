@@ -188,6 +188,15 @@ QString DbusInterface::GetDiagnostics()
     return lines.join("\n");
 }
 
+QString DbusInterface::GetVersion()
+{
+#ifdef GIT_VERSION
+    return QStringLiteral(GIT_VERSION);
+#else
+    return QStringLiteral("dev");
+#endif
+}
+
 void DbusInterface::setExtraDiagnostics(const QVariantMap &diagnostics)
 {
     m_extraDiagnostics = diagnostics;
