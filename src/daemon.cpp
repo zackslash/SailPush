@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QLoggingCategory>
 #include <QDir>
+#include <QFile>
 #include <QTimer>
 #include <QProcess>
 
@@ -517,15 +518,40 @@ void Daemon::onDbusRequestOpenMessage(const QString &messageId)
     // Emit signal for warm-start case (UI already running and receives this)
     m_dbus->notifyOpenMessageRequested(messageId);
 
-    // Activate the app via invoker. On Sailfish OS, the invoker handles
-    // single-instance — if the app is already running, it brings it to foreground.
-    // Use QTimer::singleShot(0, ...) to defer until after the current D-Bus method
-    // handler returns to the event loop.
-    QTimer::singleShot(0, this, [this]() {
-        qCInfo(lcDaemon) << "Activating app via invoker";
-        QProcess::startDetached("/usr/bin/invoker",
-            QStringList() << "--type=silica-qt5" << "/usr/bin/sailpush");
-    });
+    // Check if the UI is already running by scanning /proc for another
+    // sailpush process besides our own (the daemon).
+    // If it is, the D-Bus signal above is sufficient — don't spawn a duplicate.
+    // If it's not, launch via invoker for cold start.
+    bool uiRunning = false;
+    qint64 myPid = QCoreApplication::applicationPid();
+    QDir procDir("/proc");
+    for (const QString &entry : procDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        bool ok;
+        qint64 pid = entry.toLongLong(&ok);
+        if (!ok || pid == myPid) continue;
+
+        QFile cmdlineFile(QStringLiteral("/proc/%1/cmdline").arg(pid));
+        if (cmdlineFile.open(QIODevice::ReadOnly)) {
+            QByteArray cmdline = cmdlineFile.readAll();
+            // Match UI process: starts with "sailpush" but is NOT a daemon instance
+            if ((cmdline.startsWith("sailpush") || cmdline.startsWith("/usr/bin/sailpush"))
+                    && !cmdline.contains("--daemon")) {
+                uiRunning = true;
+                break;
+            }
+        }
+    }
+
+    if (!uiRunning) {
+        // Cold start: launch the app via invoker
+        QTimer::singleShot(0, this, [this]() {
+            qCInfo(lcDaemon) << "Activating app via invoker (cold start)";
+            QProcess::startDetached("/usr/bin/invoker",
+                QStringList() << "--type=silica-qt5" << "/usr/bin/sailpush");
+        });
+    } else {
+        qCInfo(lcDaemon) << "UI already running, relying on D-Bus signal";
+    }
 }
 
 void Daemon::onNotificationAction(const QString &messageId, const QString &action, const QString &receipt)
