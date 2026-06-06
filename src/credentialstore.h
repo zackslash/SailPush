@@ -1,43 +1,34 @@
 #ifndef CREDENTIALSTORE_H
 #define CREDENTIALSTORE_H
 
-#include <QObject>
-#include <QString>
+#include "icredentialstore.h"
+#include <Sailfish/Secrets/secretmanager.h>
+#include <Sailfish/Secrets/secret.h>
 
-class CredentialStore : public QObject {
+class CredentialStore : public ICredentialStore {
     Q_OBJECT
 
 public:
-    enum class LoadError {
-        None,
-        FileNotFound,
-        OldFormat,
-        DecryptionFailed
-    };
-
     explicit CredentialStore(const QString &dataPath, QObject *parent = nullptr);
     ~CredentialStore() override;
 
-    bool save(const QString &secret, const QString &deviceId, const QString &userKey, const QString &deviceName);
-    bool load(QString &secret, QString &deviceId, QString &userKey, QString &deviceName);
-    bool clear();
-    bool hasCredentials() const;
-
-    LoadError lastError() const { return m_lastError; }
+    bool save(const QString &secret, const QString &deviceId, const QString &userKey, const QString &deviceName) override;
+    bool load(QString &secret, QString &deviceId, QString &userKey, QString &deviceName) override;
+    bool clear() override;
+    bool hasCredentials() const override;
+    LoadError lastError() const override { return m_lastError; }
 
 private:
-    QString storagePath() const;
-    QByteArray encrypt(const QByteArray &data) const;
-    QByteArray decrypt(const QByteArray &data) const;
-    QByteArray deriveKey() const;
-    QString machineId() const;
+    bool ensureCollection();
+    bool checkSecretExists();
 
-    QString m_dataPath;
+    static const QString COLLECTION_NAME;
+    static const QString SECRET_NAME;
 
+    Sailfish::Secrets::SecretManager m_manager;
     LoadError m_lastError;
-
-    mutable QByteArray m_cachedKey;
-    mutable bool m_keyCached;
+    bool m_hasCreds;
+    bool m_collectionReady;
 };
 
 #endif // CREDENTIALSTORE_H

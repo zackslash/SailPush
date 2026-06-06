@@ -13,6 +13,7 @@ Requires:   sailfishsilica-qt5 >= 0.10.9
 # Requires:   nemo-qml-plugin-dbus (not in emulator, needed for QML UI)
 Requires:   systemd-user-session-targets
 Requires:   mce
+Requires:   sailfishsecretsdaemon-secretsplugins-default
 
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
@@ -22,6 +23,7 @@ BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(Qt5WebSockets)
 BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(Qt5Multimedia)
+BuildRequires:  pkgconfig(sailfishsecrets)
 BuildRequires:  desktop-file-utils
 
 %description

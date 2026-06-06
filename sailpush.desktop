@@ -8,7 +8,7 @@ Name=SailPush
 [X-Sailjail]
 OrganizationName=com.zackslash
 ApplicationName=sailpush
-Permissions=Internet;AppLaunch;UserDirs;Audio
+Permissions=Internet;AppLaunch;UserDirs;Audio;Secrets
 Sandboxing=Disabled
 
 [X-HarbourBackup]

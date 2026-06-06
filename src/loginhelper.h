@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QString>
 #include "sailpushclient.h"
-#include "credentialstore.h"
+#include "icredentialstore.h"
 
 class LoginHelper : public QObject {
     Q_OBJECT
@@ -54,7 +54,7 @@ private:
     void setErrorString(const QString &value);
 
     SailPushClient *m_client;
-    CredentialStore *m_store;
+    ICredentialStore *m_store;
 
     bool m_loggingIn;
     bool m_registering;

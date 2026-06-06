@@ -1,4 +1,5 @@
 #include "daemon.h"
+#include "credentialstore.h"
 #include <QCoreApplication>
 #include <QLoggingCategory>
 #include <QDir>
