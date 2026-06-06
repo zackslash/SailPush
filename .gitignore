@@ -13,6 +13,7 @@ SRPMS/
 debug/
 release/
 tests/build/
+tests/Testing/
 
 # Compiled translations
 *.qm
