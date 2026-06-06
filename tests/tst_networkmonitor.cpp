@@ -1,23 +1,31 @@
 #include <QtTest>
 #include <QSignalSpy>
 #include <QDBusConnection>
+#include <QDBusInterface>
 #include "networkmonitor.h"
 
 class TestNetworkMonitor : public QObject {
     Q_OBJECT
 
 private slots:
+    void initTestCase();
     void init();
     void cleanup();
     void testConstruction();
     void testIsOnlineDefault();
     void testSignalsExist();
-    void testNetworkAvailableSignal();
-    void testNetworkLostSignal();
 
 private:
     NetworkMonitor *m_monitor;
+    bool m_connmanAvailable;
 };
+
+void TestNetworkMonitor::initTestCase()
+{
+    QDBusInterface manager("net.connman", "/", "net.connman.Manager",
+                           QDBusConnection::systemBus());
+    m_connmanAvailable = manager.isValid();
+}
 
 void TestNetworkMonitor::init()
 {
@@ -37,8 +45,9 @@ void TestNetworkMonitor::testConstruction()
 
 void TestNetworkMonitor::testIsOnlineDefault()
 {
-    bool online = m_monitor->isOnline();
-    QVERIFY(online == true || online == false);
+    if (!m_connmanAvailable) QSKIP("ConnMan not available");
+    // Verify isOnline() returns without crashing when ConnMan is available
+    Q_UNUSED(m_monitor->isOnline());
 }
 
 void TestNetworkMonitor::testSignalsExist()
@@ -49,17 +58,5 @@ void TestNetworkMonitor::testSignalsExist()
     QVERIFY(lostSpy.isValid());
 }
 
-void TestNetworkMonitor::testNetworkAvailableSignal()
-{
-    QSignalSpy spy(m_monitor, &NetworkMonitor::networkAvailable);
-    QVERIFY(spy.isValid());
-}
-
-void TestNetworkMonitor::testNetworkLostSignal()
-{
-    QSignalSpy spy(m_monitor, &NetworkMonitor::networkLost);
-    QVERIFY(spy.isValid());
-}
-
-// tst_networkmonitor.cpp - TestNetworkMonitor class implementation
+QTEST_MAIN(TestNetworkMonitor)
 #include "tst_networkmonitor.moc"

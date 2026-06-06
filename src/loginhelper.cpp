@@ -40,7 +40,7 @@ void LoginHelper::login(const QString &email, const QString &password, const QSt
     setErrorString(QString());
     setNeedsTwoFactor(false);
 
-    qCInfo(lcLoginHelper) << "Attempting login for" << email;
+    qCInfo(lcLoginHelper) << "Attempting login";
     m_client->login(email, password, twofa);
 }
 

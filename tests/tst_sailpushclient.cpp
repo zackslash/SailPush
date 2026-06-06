@@ -64,5 +64,5 @@ void TestSailPushClient::testUrlFormat()
     QVERIFY(ackUrl.contains("my_receipt"));
 }
 
-// tst_sailpushclient.cpp - TestSailPushClient class implementation
+QTEST_MAIN(TestSailPushClient)
 #include "tst_sailpushclient.moc"

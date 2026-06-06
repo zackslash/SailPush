@@ -1,0 +1,29 @@
+name: Tests
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Qt5 dev packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qtbase5-dev cmake build-essential \
+            libqt5websockets5-dev qttools5-dev-tools
+      - name: Build tests
+        run: |
+          cd tests
+          cmake -B build
+          cmake --build build -j$(nproc)
+      - name: Run tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          cd tests/build
+          ctest --output-on-failure

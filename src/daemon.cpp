@@ -93,6 +93,13 @@ Daemon::Daemon(QObject *parent)
 Daemon::~Daemon()
 {
     stop();
+    // Zero sensitive credentials from memory
+    for (auto *s : { &m_secret, &m_deviceId }) {
+        if (!s->isEmpty()) {
+            s->fill(QChar(0));
+            s->clear();
+        }
+    }
 }
 
 void Daemon::start()

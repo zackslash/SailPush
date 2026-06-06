@@ -21,6 +21,14 @@ public:
     void publishNotification(const Message &msg, int unreadCount, bool displayOn);
     void writePendingOpenMessage(const QString &messageId);
 
+    // Public for testability — pure functions with no state dependency
+    static QString truncate(const QString &text, int maxLength);
+    static QString stripHtml(const QString &html);
+
+    // Public for testability — use tr() for translated strings
+    QVariantMap buildHints(const Message &msg, bool displayOn) const;
+    QStringList buildActions(const Message &msg) const;
+
 signals:
     void notificationActionInvoked(const QString &messageId, const QString &action, const QString &receipt);
 
@@ -28,11 +36,7 @@ private slots:
     void onActionInvoked(uint id, const QString &actionKey);
 
 private:
-    QVariantMap buildHints(const Message &msg, bool displayOn) const;
-    QStringList buildActions(const Message &msg) const;
     void trackNotification(uint notifId, const Message &msg);
-    static QString truncate(const QString &text, int maxLength);
-    static QString stripHtml(const QString &html);
 
     QHash<uint, QString> m_notificationMessageMap;
     QHash<uint, QString> m_notificationReceiptMap;

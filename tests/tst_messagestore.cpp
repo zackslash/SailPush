@@ -196,5 +196,5 @@ void TestMessageStore::testSaveAndLoad()
     delete store2;
 }
 
-// tst_messagestore.cpp - TestMessageStore class implementation
+QTEST_MAIN(TestMessageStore)
 #include "tst_messagestore.moc"

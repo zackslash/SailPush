@@ -180,5 +180,5 @@ void TestMessage::testDisplayName()
     QCOMPARE(msg.displayName(), QString(""));
 }
 
-// tst_message.cpp - TestMessage class implementation
+QTEST_MAIN(TestMessage)
 #include "tst_message.moc"

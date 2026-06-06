@@ -119,6 +119,7 @@ void NotificationManager::onActionInvoked(uint id, const QString &actionKey)
 QString NotificationManager::truncate(const QString &text, int maxLength)
 {
     if (text.length() <= maxLength) return text;
+    if (maxLength < 3) return text.left(maxLength);
     return text.left(maxLength - 3) + "...";
 }
 

@@ -12,6 +12,7 @@ BUILDROOT/
 SRPMS/
 debug/
 release/
+tests/build/
 
 # Compiled translations
 *.qm

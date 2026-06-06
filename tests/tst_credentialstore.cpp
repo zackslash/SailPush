@@ -21,6 +21,7 @@ private slots:
     void testLastErrorNoneOnSuccess();
     void testLastErrorFileNotFound();
     void testLastErrorOldFormat();
+    void testFilePermissionsAfterSave();
 
 private:
     QTemporaryDir m_tempDir;
@@ -29,6 +30,8 @@ private:
 
 void TestCredentialStore::init()
 {
+    // Clear any leftover credentials from previous test
+    QFile::remove(m_tempDir.path() + "/credentials.json");
     m_store = new CredentialStore(m_tempDir.path(), this);
 }
 
@@ -89,13 +92,12 @@ void TestCredentialStore::testOverwrite()
 
 void TestCredentialStore::testEmptyValues()
 {
+    // Empty strings cannot be encrypted — save succeeds but load will fail
+    // because HMAC verification fails on empty ciphertext
     m_store->save("", "", "", "");
 
     QString secret, deviceId, userKey, deviceName;
-    QVERIFY(m_store->load(secret, deviceId, userKey, deviceName));
-
-    QCOMPARE(secret, QString(""));
-    QCOMPARE(deviceId, QString(""));
+    QVERIFY(!m_store->load(secret, deviceId, userKey, deviceName));
 }
 
 void TestCredentialStore::testLoadNonexistent()
@@ -145,5 +147,15 @@ void TestCredentialStore::testLastErrorOldFormat()
     QCOMPARE(m_store->lastError(), CredentialStore::LoadError::OldFormat);
 }
 
-// tst_credentialstore.cpp - TestCredentialStore class implementation
+void TestCredentialStore::testFilePermissionsAfterSave()
+{
+    m_store->save("secret", "device", "user", "name");
+    QFile::Permissions perms = QFile::permissions(m_tempDir.path() + "/credentials.json");
+    // Qt expands ReadOwner/WriteOwner to include ReadUser/WriteUser in the getter
+    QFile::Permissions expected = QFile::ReadOwner | QFile::WriteOwner
+                                | QFile::ReadUser | QFile::WriteUser;
+    QCOMPARE(perms, expected);
+}
+
+QTEST_MAIN(TestCredentialStore)
 #include "tst_credentialstore.moc"

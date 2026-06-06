@@ -1,10 +1,13 @@
 #include <QtTest>
+#include <QDBusConnection>
+#include <QDBusInterface>
 #include "cpukeepalive.h"
 
 class TestCpuKeepalive : public QObject {
     Q_OBJECT
 
 private slots:
+    void initTestCase();
     void init();
     void cleanup();
     void testConstruction();
@@ -17,7 +20,16 @@ private slots:
 
 private:
     CpuKeepalive *m_keepalive;
+    bool m_mceAvailable;
 };
+
+void TestCpuKeepalive::initTestCase()
+{
+    // Check if MCE D-Bus service is available (only on Sailfish devices)
+    QDBusInterface mce("com.nokia.mce", "/com/nokia/mce/request",
+                       "com.nokia.mce.request", QDBusConnection::systemBus());
+    m_mceAvailable = mce.isValid();
+}
 
 void TestCpuKeepalive::init()
 {
@@ -42,6 +54,7 @@ void TestCpuKeepalive::testInitialNotActive()
 
 void TestCpuKeepalive::testStartStop()
 {
+    if (!m_mceAvailable) QSKIP("MCE D-Bus service not available");
     m_keepalive->start();
     QVERIFY(m_keepalive->isActive());
 
@@ -51,6 +64,7 @@ void TestCpuKeepalive::testStartStop()
 
 void TestCpuKeepalive::testNestedStartStop()
 {
+    if (!m_mceAvailable) QSKIP("MCE D-Bus service not available");
     m_keepalive->start();
     QVERIFY(m_keepalive->isActive());
 
@@ -66,6 +80,7 @@ void TestCpuKeepalive::testNestedStartStop()
 
 void TestCpuKeepalive::testMultipleStarts()
 {
+    if (!m_mceAvailable) QSKIP("MCE D-Bus service not available");
     for (int i = 0; i < 5; ++i) {
         m_keepalive->start();
     }
@@ -85,10 +100,11 @@ void TestCpuKeepalive::testStopWithoutStart()
 
 void TestCpuKeepalive::testDestructorStops()
 {
+    if (!m_mceAvailable) QSKIP("MCE D-Bus service not available");
     CpuKeepalive *ka = new CpuKeepalive();
     ka->start();
     delete ka;
 }
 
-// tst_cpukeepalive.cpp - TestCpuKeepalive class implementation
+QTEST_MAIN(TestCpuKeepalive)
 #include "tst_cpukeepalive.moc"

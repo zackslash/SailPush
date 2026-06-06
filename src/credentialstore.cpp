@@ -23,6 +23,12 @@ CredentialStore::CredentialStore(const QString &dataPath, QObject *parent)
 {
 }
 
+CredentialStore::~CredentialStore()
+{
+    // Zero sensitive key material before destruction
+    m_cachedKey.fill(0);
+}
+
 bool CredentialStore::save(const QString &secret, const QString &deviceId, const QString &userKey, const QString &deviceName)
 {
     QJsonObject obj;
@@ -49,6 +55,11 @@ bool CredentialStore::save(const QString &secret, const QString &deviceId, const
 
     file.write(doc.toJson(QJsonDocument::Compact));
     file.close();
+
+    // Restrict file permissions to owner only
+    if (!QFile::setPermissions(storagePath(), QFile::ReadOwner | QFile::WriteOwner)) {
+        qCWarning(lcCredentialStore) << "Failed to set file permissions";
+    }
 
     qCInfo(lcCredentialStore) << "Credentials saved";
     return true;
