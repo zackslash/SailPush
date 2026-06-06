@@ -2,6 +2,8 @@
 #include <QCoreApplication>
 #include <QLoggingCategory>
 #include <QDir>
+#include <QTimer>
+#include <QProcess>
 
 Q_LOGGING_CATEGORY(lcDaemon, "com.zackslash.sailpush.daemon")
 
@@ -27,7 +29,7 @@ Daemon::Daemon(QObject *parent)
     , m_store(new MessageStore(dataPath(), this))
     , m_credentials(new CredentialStore(dataPath(), this))
     , m_dbus(nullptr)
-    , m_notificationManager(new NotificationManager(this))
+    , m_notificationManager(new NotificationManager(cachePath(), this))
     , m_networkMonitor(new NetworkMonitor(this))
     , m_cpuKeepalive(new CpuKeepalive(this))
     , m_soundPlayer(new SoundPlayer(this))
@@ -46,7 +48,7 @@ Daemon::Daemon(QObject *parent)
 
     m_store->load();
 
-    m_dbus = new DbusInterface(m_store, m_wsManager, this);
+    m_dbus = new DbusInterface(m_store, m_wsManager, cachePath(), this);
 
     loadSettings();
 
@@ -499,19 +501,33 @@ void Daemon::onDbusRequestQuit()
 
 void Daemon::onDbusRequestOpenMessage(const QString &messageId)
 {
-    Q_UNUSED(messageId);
     qCInfo(lcDaemon) << "D-Bus: open message requested:" << messageId;
+
+    // Write pending file so the app can read it on startup
+    m_notificationManager->writePendingOpenMessage(messageId);
+
+    // Emit signal for warm-start case (UI already running and receives this)
+    m_dbus->notifyOpenMessageRequested(messageId);
+
+    // Activate the app via invoker. On Sailfish OS, the invoker handles
+    // single-instance — if the app is already running, it brings it to foreground.
+    // Use QTimer::singleShot(0, ...) to defer until after the current D-Bus method
+    // handler returns to the event loop.
+    QTimer::singleShot(0, this, [this]() {
+        qCInfo(lcDaemon) << "Activating app via invoker";
+        QProcess::startDetached("/usr/bin/invoker",
+            QStringList() << "--type=silica-qt5" << "/usr/bin/sailpush");
+    });
 }
 
 void Daemon::onNotificationAction(const QString &messageId, const QString &action, const QString &receipt)
 {
     qCInfo(lcDaemon) << "Notification action:" << action << "message:" << messageId << "receipt:" << receipt;
 
-    if (action == "default") {
-        m_store->markAsRead(messageId);
-        m_store->save();
-        m_dbus->notifyUnreadCountChanged();
-    } else if (action == "acknowledge") {
+    // Note: "default" action is NOT handled here. On Sailfish, tapping the notification
+    // triggers the x-nemo-remote-action-default hint, which calls OpenMessage via D-Bus.
+    // Handling "default" here would cause double invocation (ActionInvoked + remote action).
+    if (action == "acknowledge") {
         if (!receipt.isEmpty()) {
             m_client->acknowledgeEmergency(m_secret, receipt);
         }

@@ -19,7 +19,8 @@ public:
     static constexpr const char *OBJECT_PATH = "/com/zackslash/sailpush";
     static constexpr const char *INTERFACE_NAME = "com.zackslash.sailpush";
 
-    explicit DbusInterface(MessageStore *store, WebSocketManager *wsManager, QObject *parent = nullptr);
+    explicit DbusInterface(MessageStore *store, WebSocketManager *wsManager,
+                           const QString &cachePath, QObject *parent = nullptr);
 
     bool registerService();
     void unregisterService();
@@ -45,6 +46,7 @@ public slots:
     Q_SCRIPTABLE void MarkAsRead(const QString &messageId);
     Q_SCRIPTABLE void MarkAllAsRead();
     Q_SCRIPTABLE void OpenMessage(const QString &messageId);
+    Q_SCRIPTABLE QString GetPendingOpenMessage();
     Q_SCRIPTABLE void Quit();
     Q_SCRIPTABLE QString GetDiagnostics();
 
@@ -53,6 +55,7 @@ public slots:
     void notifyUnreadCountChanged();
     void setExtraDiagnostics(const QVariantMap &diagnostics);
     void notifyCredentialsInvalidated(const QString &reason);
+    void notifyOpenMessageRequested(const QString &messageId);
 
 signals:
     void MessageReceived(const QVariantMap &message);
@@ -71,6 +74,10 @@ signals:
 
     void requestUpdateSettings(const QVariantMap &settings);
 
+    // Signal emitted when the daemon wants the UI to open a specific message
+    // (e.g., after a notification tap)
+    void OpenMessageRequested(const QString &messageId);
+
 private slots:
     void onWsStateChanged(WebSocketManager::ConnectionState state);
 
@@ -85,6 +92,7 @@ private:
     bool m_registered;
     bool m_autoStartEnabled;
     QVariantMap m_extraDiagnostics;
+    QString m_cachePath;
 };
 
 #endif // DBUSINTERFACE_H

@@ -1,9 +1,14 @@
 #include "notificationmanager.h"
+#include <QCoreApplication>
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QDBusConnection>
+#include <QDataStream>
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QFile>
+#include <QDir>
+#include <QStandardPaths>
 
 Q_LOGGING_CATEGORY(lcNotification, "com.zackslash.sailpush.notification")
 
@@ -11,10 +16,11 @@ static const QString DBUS_SERVICE = QStringLiteral("org.freedesktop.Notification
 static const QString DBUS_PATH = QStringLiteral("/org/freedesktop/Notifications");
 static const QString DBUS_IFACE = QStringLiteral("org.freedesktop.Notifications");
 
-NotificationManager::NotificationManager(QObject *parent)
+NotificationManager::NotificationManager(const QString &cachePath, QObject *parent)
     : QObject(parent)
     , m_notificationsIface(new QDBusInterface(DBUS_SERVICE, DBUS_PATH, DBUS_IFACE,
                                               QDBusConnection::sessionBus(), this))
+    , m_cachePath(cachePath)
 {
     QDBusConnection::sessionBus().connect(DBUS_SERVICE, DBUS_PATH, DBUS_IFACE,
                                           "ActionInvoked", this,
@@ -35,6 +41,25 @@ void NotificationManager::publishNotification(const Message &msg, int unreadCoun
     hints.insert("x-nemo-preview-summary", summary);
     hints.insert("x-nemo-preview-body", truncate(plainBody, 100));
     hints.insert("category", CATEGORY);
+    // x-nemo-owner tells lipstick which process owns this notification.
+    // Required for LaunchManager to associate the notification with our app
+    // and for the remote action D-Bus call chain to work correctly.
+    // The QML Notification type sets this automatically; raw D-Bus calls must set it explicitly.
+    hints.insert("x-nemo-owner", QCoreApplication::applicationName());
+
+    // Nemo remote action: tapping the notification calls OpenMessage on our D-Bus
+    // interface. Lipstick reads per-action hints in the format:
+    //   x-nemo-remote-action-<name> = "service path iface method [base64args...]"
+    // Arguments must be QDataStream-serialized then Base64-encoded.
+    // The "default" action name must also be in the actions list (buildActions).
+    QByteArray argBuffer;
+    QDataStream argStream(&argBuffer, QIODevice::WriteOnly);
+    argStream << QVariant(msg.id);
+    QString base64Arg = QString::fromLatin1(argBuffer.toBase64());
+
+    QString remoteActionValue = QStringLiteral("com.zackslash.sailpush /com/zackslash/sailpush com.zackslash.sailpush OpenMessage %1").arg(base64Arg);
+    hints.insert("x-nemo-remote-action-default", remoteActionValue);
+    hints.insert("x-nemo-remote-action-icon-default", QStringLiteral("image://theme/icon-m-notifications"));
 
     if (unreadCount > 0) {
         hints.insert("x-nemo-item-count", unreadCount);
@@ -76,7 +101,6 @@ void NotificationManager::publishNotification(const Message &msg, int unreadCoun
         uint id = reply.value();
         qCInfo(lcNotification) << "Notification published with ID:" << id;
         trackNotification(id, msg);
-
     } else {
         qCWarning(lcNotification) << "Failed to publish notification:" << reply.error().message();
     }
@@ -156,6 +180,9 @@ QVariantMap NotificationManager::buildHints(const Message &msg, bool displayOn) 
 QStringList NotificationManager::buildActions(const Message &msg) const
 {
     QStringList actions;
+    // "default" action is required for the notification to be interactive.
+    // The corresponding x-nemo-remote-action-default hint tells lipstick which
+    // D-Bus method to invoke when the notification is tapped.
     actions.append("default");
     actions.append(tr("Open"));
 
@@ -175,5 +202,18 @@ void NotificationManager::trackNotification(uint notifId, const Message &msg)
     m_notificationMessageMap.insert(notifId, msg.id);
     if (!msg.receipt.isEmpty()) {
         m_notificationReceiptMap.insert(notifId, msg.receipt);
+    }
+}
+
+void NotificationManager::writePendingOpenMessage(const QString &messageId)
+{
+    QString path = m_cachePath + "/pending_open";
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        file.write(messageId.toUtf8());
+        file.close();
+        qCInfo(lcNotification) << "Wrote pending open message:" << messageId;
+    } else {
+        qCWarning(lcNotification) << "Failed to write pending open file:" << file.errorString();
     }
 }

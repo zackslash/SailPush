@@ -14,6 +14,8 @@ Item {
     property string diagnosticInfo: ""
     signal connectionStateUpdated(string state)
     signal credentialsInvalidated(string reason)
+    signal openMessageRequested(string messageId)
+    signal daemonFound()
 
     DBusInterface {
         id: daemonInterface
@@ -83,10 +85,12 @@ Item {
             if (!daemonCheckTimer.running) daemonCheckTimer.start()
             daemonInterface.call("ReloadCredentials")
             _refreshAutoStart()
+            root.refresh()
+            // Re-query connection state after 3s to catch post-sync WebSocket updates
+            delayedStateRefresh.restart()
+            // Notify UI that daemon is now available (for pending open message checks)
+            root.daemonFound()
         }
-        root.refresh()
-        // Re-query connection state after 3s to catch post-sync WebSocket updates
-        delayedStateRefresh.restart()
     }
 
     Timer {
@@ -131,6 +135,8 @@ Item {
                 root.connectionStateUpdated(args[0])
             } else if (signalName === "CredentialsInvalidated") {
                 root.credentialsInvalidated(args[0])
+            } else if (signalName === "OpenMessageRequested") {
+                root.openMessageRequested(args[0])
             } else if (signalName === "unreadCountChanged" || signalName === "MessageReceived") {
                 root.refresh()
             }
@@ -194,8 +200,15 @@ Item {
         daemonInterface.call("AcknowledgeEmergency", [receipt])
     }
 
-    function openMessage(messageId) {
-        daemonInterface.call("OpenMessage", [messageId])
+    function checkPendingOpenMessage(callback) {
+        daemonInterface.typedCall("GetPendingOpenMessage", [],
+            function(messageId) {
+                if (messageId && messageId.length > 0) {
+                    callback(messageId)
+                }
+            },
+            function(error, message) { /* daemon may have just stopped */ }
+        )
     }
 
     function quitDaemon() {

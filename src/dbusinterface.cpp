@@ -3,15 +3,18 @@
 #include <QDBusError>
 #include <QLoggingCategory>
 #include <QProcess>
+#include <QFile>
 
 Q_LOGGING_CATEGORY(lcDbus, "com.zackslash.sailpush.dbus")
 
-DbusInterface::DbusInterface(MessageStore *store, WebSocketManager *wsManager, QObject *parent)
+DbusInterface::DbusInterface(MessageStore *store, WebSocketManager *wsManager,
+                             const QString &cachePath, QObject *parent)
     : QObject(parent)
     , m_store(store)
     , m_wsManager(wsManager)
     , m_registered(false)
     , m_autoStartEnabled(false)
+    , m_cachePath(cachePath)
 {
     connect(wsManager, &WebSocketManager::stateChanged,
             this, &DbusInterface::onWsStateChanged);
@@ -143,6 +146,23 @@ void DbusInterface::OpenMessage(const QString &messageId)
     emit requestOpenMessage(messageId);
 }
 
+QString DbusInterface::GetPendingOpenMessage()
+{
+    QString path = m_cachePath + "/pending_open";
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly)) {
+        QString messageId = QString::fromUtf8(file.readAll()).trimmed();
+        file.close();
+        // Remove the file after reading so it's only consumed once
+        if (!QFile::remove(path)) {
+            qCWarning(lcDbus) << "Failed to remove pending_open file:" << path;
+        }
+        qCInfo(lcDbus) << "Consumed pending open message:" << messageId;
+        return messageId;
+    }
+    return QString();
+}
+
 void DbusInterface::Quit()
 {
     emit requestQuit();
@@ -176,6 +196,11 @@ void DbusInterface::setExtraDiagnostics(const QVariantMap &diagnostics)
 void DbusInterface::notifyCredentialsInvalidated(const QString &reason)
 {
     emit CredentialsInvalidated(reason);
+}
+
+void DbusInterface::notifyOpenMessageRequested(const QString &messageId)
+{
+    emit OpenMessageRequested(messageId);
 }
 
 void DbusInterface::notifyUnreadCountChanged()
