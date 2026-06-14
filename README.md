@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="icons/full.png" alt="SailPush" width="128">
+</p>
+
 # SailPush
 
 Unofficial Pushover client for SailfishOS. Real-time notifications via WebSocket, background daemon with systemd integration.
