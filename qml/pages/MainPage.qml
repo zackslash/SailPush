@@ -30,12 +30,12 @@ Page {
 
         PullDownMenu {
             MenuItem {
-                text: qsTr("Mark all read")
-                onClicked: rootDaemon.markAllAsRead()
-            }
-            MenuItem {
                 text: qsTr("Settings")
                 onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"), {rootDaemon: rootDaemon})
+            }
+            MenuItem {
+                text: qsTr("Mark all read")
+                onClicked: rootDaemon.markAllAsRead()
             }
         }
 
