@@ -12,8 +12,8 @@ public:
     explicit CredentialStore(const QString &dataPath, QObject *parent = nullptr);
     ~CredentialStore() override;
 
-    bool save(const QString &secret, const QString &deviceId, const QString &userKey, const QString &deviceName) override;
-    bool load(QString &secret, QString &deviceId, QString &userKey, QString &deviceName) override;
+    bool save(const QString &secret, const QString &deviceId) override;
+    bool load(QString &secret, QString &deviceId) override;
     bool clear() override;
     bool hasCredentials() const override;
     LoadError lastError() const override { return m_lastError; }

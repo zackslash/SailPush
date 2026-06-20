@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Išsaugoti prisijungimo duomenys negalėjo būti iššifruoti. Tai gali nutikti po sistemos atnaujinimo. Prašome prisijungti iš naujo.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets paslauga neprieinama. Paleiskite įrenginį iš naujo ir bandykite dar kartą.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

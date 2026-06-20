@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Ni ellid datgryptio'r manylion a gadwyd. Gall hyn ddigwydd ar ôl diweddariad system. Mewngofnodwch eto os gwelwch yn dda.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Nid yw gwasanaeth secrets ar gael. Ail-gychwynnwch y ddyfais a rhowch gynnig arall arni.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

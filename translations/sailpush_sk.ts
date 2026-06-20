@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Uložené prihlasovacie údaje nemožno dešifrovať. K tomu môže dôjsť po aktualizácii systému. Prihláste sa znova.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Služba secrets nie je dostupná. Reštartujte zariadenie a skúste to znova.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

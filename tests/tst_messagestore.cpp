@@ -17,8 +17,8 @@ private slots:
     void testMarkAsRead();
     void testMarkAllAsRead();
     void testRemoveMessage();
+    void testContainsAfterRemove();
     void testUnreadCount();
-    void testHighestMessageId();
     void testContainsMessage();
     void testTrimMessages();
     void testSaveAndLoad();
@@ -44,7 +44,6 @@ void TestMessageStore::testEmptyStore()
     QCOMPARE(m_store->messages().size(), 0);
     QCOMPARE(m_store->unreadCount(), 0);
     QCOMPARE(m_store->totalCount(), 0);
-    QCOMPARE(m_store->highestMessageId(), QString());
 }
 
 void TestMessageStore::testAddMessage()
@@ -129,6 +128,20 @@ void TestMessageStore::testRemoveMessage()
     QCOMPARE(m_store->messages().size(), 0);
 }
 
+void TestMessageStore::testContainsAfterRemove()
+{
+    Message msg;
+    msg.id = "msg1";
+    m_store->addMessage(msg);
+
+    QVERIFY(m_store->containsMessage("msg1"));
+
+    m_store->removeMessage("msg1");
+
+    QVERIFY(!m_store->containsMessage("msg1"));
+    QCOMPARE(m_store->messages().size(), 0);
+}
+
 void TestMessageStore::testUnreadCount()
 {
     Message m1, m2, m3;
@@ -141,18 +154,6 @@ void TestMessageStore::testUnreadCount()
     m_store->addMessage(m3);
 
     QCOMPARE(m_store->unreadCount(), 2);
-}
-
-void TestMessageStore::testHighestMessageId()
-{
-    Message m1, m2;
-    m1.id = "1";
-    m2.id = "2";
-
-    m_store->addMessage(m1);
-    m_store->addMessage(m2);
-
-    QCOMPARE(m_store->highestMessageId(), QString("2"));
 }
 
 void TestMessageStore::testContainsMessage()

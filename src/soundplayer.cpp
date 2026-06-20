@@ -56,7 +56,9 @@ bool SoundPlayer::soundExists(const QString &soundName, const QString &cacheDir)
 
 void SoundPlayer::downloadSound(const QString &soundName, const QString &cacheDir)
 {
-    m_downloadQueue.enqueue(qMakePair(soundName, cacheDir));
+    QPair<QString, QString> entry = qMakePair(soundName, cacheDir);
+    if (m_downloadQueue.contains(entry)) return;
+    m_downloadQueue.enqueue(entry);
     if (!m_downloading) {
         processNextDownload();
     }

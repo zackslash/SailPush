@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Saglabātās akreditācijas nevarēja atšifrēt. Tas var notikt pēc sistēmas atjauninājuma. Lūdzu, piesakieties vēlreiz.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets pakalpojums nav pieejams. Restartējiet ierīci un mēģiniet vēlreiz.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>
@@ -275,7 +279,7 @@ Velciet lejup, lai sinhronizētu</translation>
         </message>
         <message>
             <source>Deep Sleep</source>
-            <translation> Dziļais miegs</translation>
+            <translation>Dziļais miegs</translation>
         </message>
         <message>
             <source>Enable Polling Fallback</source>

@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>A mentett hitelesítő adatok nem fejthetők vissza. Ez rendszerfrissítés után fordulhat elő. Kérjük, jelentkezzen be újra.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>A secrets szolgáltatás nem érhető el. Kérjük, indítsa újra az eszközt és próbálja újra.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Níorbh fhéidir na creidiúintí sábháilte a dhíchriptiú. Is féidir é seo tarlú tar éis nuashonrú córais. Logáil isteach arís le do thoil.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Níl seirbhís secrets ar fáil. Atosaigh an gléas agus bain triail as arís.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Les identifiants enregistrés n'ont pas pu être déchiffrés. Cela peut survenir après une mise à jour système. Veuillez vous reconnecter.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Le service de secrets n'est pas disponible. Veuillez redémarrer l'appareil et réessayer.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

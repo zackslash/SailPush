@@ -45,8 +45,19 @@ private slots:
     void onReplyFinished(QNetworkReply *reply);
 
 private:
+    enum class Action {
+        Login,
+        Register,
+        Download,
+        Delete,
+        Acknowledge
+    };
+
+    QNetworkReply* sendRequest(const QUrl &url, const QByteArray &postData, Action action);
+    void emitError(Action action, const QString &message);
+    static QString extractErrorMessage(const QJsonObject &root);
+
     QNetworkAccessManager *m_networkManager;
-    QString m_userAgent;
 };
 
 #endif // SAILPUSHCLIENT_H

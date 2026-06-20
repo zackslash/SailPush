@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Opgeslagen inloggegevens konden niet worden ontsleuteld. Dit kan gebeuren na een systeemupdate. Log opnieuw in.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>De secrets-service is niet beschikbaar. Start het apparaat opnieuw op en probeer het opnieuw.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

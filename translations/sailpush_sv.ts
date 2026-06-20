@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Sparade inloggningsuppgifter kunde inte dekrypteras. Detta kan hända efter en systemuppdatering. Vänligen logga in igen.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets-tjänsten är inte tillgänglig. Starta om enheten och försök igen.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Τα αποθηκευμένα διαπιστευτήρια δεν μπόρεσαν να αποκρυπτογραφηθούν. Αυτό μπορεί να συμβεί μετά από ενημέρωση συστήματος. Παρακαλώ συνδεθείτε ξανά.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Η υπηρεσία secrets δεν είναι διαθέσιμη. Επανεκκινήστε τη συσκευή και δοκιμάστε ξανά.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

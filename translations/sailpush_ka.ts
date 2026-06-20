@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>შენახული მონაცემების გაშიფვრა ვერ მოხერხდა. ეს შეიძლება მოხდეს სისტემის განახლების შემდეგ. გთხოვთ, ხელახლა შეხვიდეთ.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets სერვისი ხელმისაწვდომი არ არის. გადატვირთეთ მოწყობილობა და კიდევ სცადეთ.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>
@@ -170,7 +174,7 @@ Pull down to sync</source>
         </message>
         <message>
             <source>Deleting</source>
-            <translation>წაშლა</translation>
+            <translation>წაშლა მიმდინარეობს</translation>
         </message>
         <message>
             <source>Message</source>

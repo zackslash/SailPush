@@ -28,14 +28,12 @@ FileCredentialStore::~FileCredentialStore()
     m_cachedKey.fill(0);
 }
 
-bool FileCredentialStore::save(const QString &secret, const QString &deviceId, const QString &userKey, const QString &deviceName)
+bool FileCredentialStore::save(const QString &secret, const QString &deviceId)
 {
     QJsonObject obj;
     obj.insert("version", 2);
     obj.insert("secret", QString::fromUtf8(encrypt(secret.toUtf8())));
     obj.insert("device_id", QString::fromUtf8(encrypt(deviceId.toUtf8())));
-    obj.insert("user_key", QString::fromUtf8(encrypt(userKey.toUtf8())));
-    obj.insert("device_name", QString::fromUtf8(encrypt(deviceName.toUtf8())));
 
     QJsonDocument doc(obj);
     QFile file(storagePath());
@@ -63,7 +61,7 @@ bool FileCredentialStore::save(const QString &secret, const QString &deviceId, c
     return true;
 }
 
-bool FileCredentialStore::load(QString &secret, QString &deviceId, QString &userKey, QString &deviceName)
+bool FileCredentialStore::load(QString &secret, QString &deviceId)
 {
     m_lastError = LoadError::None;
 
@@ -112,8 +110,6 @@ bool FileCredentialStore::load(QString &secret, QString &deviceId, QString &user
 
     secret = decryptField("secret");
     deviceId = decryptField("device_id");
-    userKey = decryptField("user_key");
-    deviceName = decryptField("device_name");
 
     if (!ok) {
         qCWarning(lcFileCredentialStore) << "Failed to decrypt some credential fields";

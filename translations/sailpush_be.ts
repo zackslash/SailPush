@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Захаваныя ўліковыя даныя не ўдалося расшыфраваць. Гэта можа здарыцца пасля абнаўлення сістэмы. Калі ласка, увайдзіце зноў.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Служба secrets недаступная. Перезагрузіце прыладу і паспрабуйце зноў.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>
@@ -305,7 +309,7 @@ mcetool --set-suspend-policy=early</translation>
         </message>
         <message>
             <source>Polling Fallback</source>
-            <translation>Рэзервовы апытанне</translation>
+            <translation>Рэзервовае апытанне</translation>
         </message>
         <message>
             <source>Polling Interval</source>
