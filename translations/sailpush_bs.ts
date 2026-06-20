@@ -52,7 +52,7 @@
         <name>LoginHelper</name>
         <message>
             <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
-            <translation>Aplikacija je ažurirana — sačuvani akreditive koriste stariji format i ne mogu se migrirati. Molimo prijavite se ponovo.</translation>
+            <translation>Aplikacija je ažurirana — sačuvani akreditivi koriste stariji format i ne mogu se migrirati. Molimo prijavite se ponovo.</translation>
         </message>
         <message>
             <source>Failed to save credentials</source>
@@ -60,7 +60,11 @@
         </message>
         <message>
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
-            <translation>Sačuvani akreditive nisu mogli biti dešifrirani. Ovo se može desiti nakon ažuriranja sistema. Molimo prijavite se ponovo.</translation>
+            <translation>Sačuvani akreditivi nisu mogli biti dešifrirani. Ovo se može desiti nakon ažuriranja sistema. Molimo prijavite se ponovo.</translation>
+        </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets usluga nije dostupna. Ponovo pokrenite uređaj i pokušajte ponovo.</translation>
         </message>
     </context>
     <context>

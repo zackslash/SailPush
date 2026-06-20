@@ -61,9 +61,7 @@ private:
     bool m_needsTwoFactor;
     QString m_errorString;
     QString m_migrationReason;
-    QString m_pendingUserKey;
     QString m_pendingSecret;
-    QString m_pendingDeviceName;
 };
 
 #endif // LOGINHELPER_H

@@ -18,8 +18,8 @@ public:
     explicit ICredentialStore(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~ICredentialStore() = default;
 
-    virtual bool save(const QString &secret, const QString &deviceId, const QString &userKey, const QString &deviceName) = 0;
-    virtual bool load(QString &secret, QString &deviceId, QString &userKey, QString &deviceName) = 0;
+    virtual bool save(const QString &secret, const QString &deviceId) = 0;
+    virtual bool load(QString &secret, QString &deviceId) = 0;
     virtual bool clear() = 0;
     virtual bool hasCredentials() const = 0;
     virtual LoadError lastError() const = 0;

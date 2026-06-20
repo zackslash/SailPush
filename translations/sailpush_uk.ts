@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Збережені облікові дані не вдалося розшифрувати. Це може статися після оновлення системи. Будь ласка, увійдіть знову.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Служба secrets недоступна. Перезавантажте пристрій і спробуйте знову.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

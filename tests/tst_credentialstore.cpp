@@ -47,28 +47,26 @@ void TestCredentialStore::testNoCredentialsInitially()
 
 void TestCredentialStore::testSaveAndLoad()
 {
-    QVERIFY(m_store->save("secret123", "device456", "user789", "MyDevice"));
+    QVERIFY(m_store->save("secret123", "device456"));
 
-    QString secret, deviceId, userKey, deviceName;
-    QVERIFY(m_store->load(secret, deviceId, userKey, deviceName));
+    QString secret, deviceId;
+    QVERIFY(m_store->load(secret, deviceId));
 
     QCOMPARE(secret, QString("secret123"));
     QCOMPARE(deviceId, QString("device456"));
-    QCOMPARE(userKey, QString("user789"));
-    QCOMPARE(deviceName, QString("MyDevice"));
 }
 
 void TestCredentialStore::testHasCredentials()
 {
     QVERIFY(!m_store->hasCredentials());
 
-    m_store->save("secret", "device", "user", "name");
+    m_store->save("secret", "device");
     QVERIFY(m_store->hasCredentials());
 }
 
 void TestCredentialStore::testClear()
 {
-    m_store->save("secret", "device", "user", "name");
+    m_store->save("secret", "device");
     QVERIFY(m_store->hasCredentials());
 
     QVERIFY(m_store->clear());
@@ -77,48 +75,48 @@ void TestCredentialStore::testClear()
 
 void TestCredentialStore::testOverwrite()
 {
-    m_store->save("secret1", "device1", "user1", "name1");
+    m_store->save("secret1", "device1");
 
-    QString secret, deviceId, userKey, deviceName;
-    m_store->load(secret, deviceId, userKey, deviceName);
+    QString secret, deviceId;
+    m_store->load(secret, deviceId);
     QCOMPARE(secret, QString("secret1"));
 
-    m_store->save("secret2", "device2", "user2", "name2");
-    m_store->load(secret, deviceId, userKey, deviceName);
+    m_store->save("secret2", "device2");
+    m_store->load(secret, deviceId);
     QCOMPARE(secret, QString("secret2"));
     QCOMPARE(deviceId, QString("device2"));
 }
 
 void TestCredentialStore::testEmptyValues()
 {
-    m_store->save("", "", "", "");
+    m_store->save("", "");
 
-    QString secret, deviceId, userKey, deviceName;
-    QVERIFY(!m_store->load(secret, deviceId, userKey, deviceName));
+    QString secret, deviceId;
+    QVERIFY(!m_store->load(secret, deviceId));
 }
 
 void TestCredentialStore::testLoadNonexistent()
 {
     FileCredentialStore *emptyStore = new FileCredentialStore("/nonexistent/path/that/does/not/exist", this);
-    QString secret, deviceId, userKey, deviceName;
-    QVERIFY(!emptyStore->load(secret, deviceId, userKey, deviceName));
+    QString secret, deviceId;
+    QVERIFY(!emptyStore->load(secret, deviceId));
     QCOMPARE(emptyStore->lastError(), FileCredentialStore::LoadError::SecretNotFound);
     delete emptyStore;
 }
 
 void TestCredentialStore::testLastErrorNoneOnSuccess()
 {
-    m_store->save("secret", "device", "user", "name");
+    m_store->save("secret", "device");
 
-    QString secret, deviceId, userKey, deviceName;
-    QVERIFY(m_store->load(secret, deviceId, userKey, deviceName));
+    QString secret, deviceId;
+    QVERIFY(m_store->load(secret, deviceId));
     QCOMPARE(m_store->lastError(), FileCredentialStore::LoadError::None);
 }
 
 void TestCredentialStore::testLastErrorSecretNotFound()
 {
-    QString secret, deviceId, userKey, deviceName;
-    QVERIFY(!m_store->load(secret, deviceId, userKey, deviceName));
+    QString secret, deviceId;
+    QVERIFY(!m_store->load(secret, deviceId));
     QCOMPARE(m_store->lastError(), FileCredentialStore::LoadError::SecretNotFound);
 }
 
@@ -128,8 +126,6 @@ void TestCredentialStore::testLastErrorInvalidFormat()
     obj.insert("version", 1);
     obj.insert("secret", "encrypted");
     obj.insert("device_id", "encrypted");
-    obj.insert("user_key", "encrypted");
-    obj.insert("device_name", "encrypted");
     QJsonDocument doc(obj);
 
     QString path = m_tempDir.path() + "/credentials.json";
@@ -138,14 +134,14 @@ void TestCredentialStore::testLastErrorInvalidFormat()
     file.write(doc.toJson(QJsonDocument::Compact));
     file.close();
 
-    QString secret, deviceId, userKey, deviceName;
-    QVERIFY(!m_store->load(secret, deviceId, userKey, deviceName));
+    QString secret, deviceId;
+    QVERIFY(!m_store->load(secret, deviceId));
     QCOMPARE(m_store->lastError(), FileCredentialStore::LoadError::InvalidFormat);
 }
 
 void TestCredentialStore::testFilePermissionsAfterSave()
 {
-    m_store->save("secret", "device", "user", "name");
+    m_store->save("secret", "device");
     QFile::Permissions perms = QFile::permissions(m_tempDir.path() + "/credentials.json");
     QFile::Permissions expected = QFile::ReadOwner | QFile::WriteOwner
                                 | QFile::ReadUser | QFile::WriteUser;

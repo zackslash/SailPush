@@ -60,7 +60,11 @@
         </message>
         <message>
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
-            <translation>Ekki var hægt að afrita vistuð skilríki. Þetta getur gerst eftir kerfisuppfærslu. Vinsamlegast skráðu þig inn aftur.</translation>
+            <translation>Ekki var hægt að dulráða vistuð skilríki. Þetta getur gerst eftir kerfisuppfærslu. Vinsamlegast skráðu þig inn aftur.</translation>
+        </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets-þjónustan er ekki tiltæk. Endurræstu tækið og reyndu aftur.</translation>
         </message>
     </context>
     <context>
@@ -283,7 +287,7 @@ Dragðu niður til að samstilla</translation>
         </message>
         <message>
             <source>If WebSocket disconnects for 30s, falls back to periodic polling for notifications.</source>
-            <translation>Ef WebSocket aftengist í 30 sekúndur, fellur á aftur á tímabundið polling fyrir tilkynningar.</translation>
+            <translation>Ef WebSocket aftengist í 30 sekúndur, fellur aftur á tímabundið polling fyrir tilkynningar.</translation>
         </message>
         <message>
             <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>

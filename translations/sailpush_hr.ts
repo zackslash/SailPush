@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Spremljene vjerodajnice nije moguće dešifrirati. To se može dogoditi nakon ažuriranja sustava. Prijavite se ponovo.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets usluga nije dostupna. Ponovno pokrenite uređaj i pokušajte ponovno.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>
@@ -143,11 +147,11 @@ Povucite dolje za sinkronizaciju</translation>
         <name>MessageDelegate</name>
         <message>
             <source>%1h ago</source>
-            <translation>pri %1h</translation>
+            <translation>prije %1h</translation>
         </message>
         <message>
             <source>%1m ago</source>
-            <translation>pri %1m</translation>
+            <translation>prije %1m</translation>
         </message>
         <message>
             <source>Delete</source>

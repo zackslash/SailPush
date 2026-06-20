@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QTimer>
 #include <QSettings>
-#include <QSet>
 #include <QStandardPaths>
 #include "sailpushclient.h"
 #include "websocketmanager.h"
@@ -61,7 +60,7 @@ private:
     void performSync();
     void deleteMessagesUpTo(const QString &highestId);
     void publishNotificationForMessage(const Message &msg, bool isNew);
-    void handleEmergencyMessage(const Message &msg);
+    bool isUiRunning();
     void updateDiagnostics();
 
     SailPushClient *m_client;
@@ -79,7 +78,6 @@ private:
 
     QString m_secret;
     QString m_deviceId;
-    QSet<QString> m_pendingDeleteIds;
 
     bool m_startupSyncDone;
     bool m_credentialsLoaded;

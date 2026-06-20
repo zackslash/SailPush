@@ -2,7 +2,6 @@
 #define WEBSOCKETMANAGER_H
 
 #include <QObject>
-#include <QVariant>
 #include <QWebSocket>
 #include <QTimer>
 #include <QLoggingCategory>
@@ -65,7 +64,8 @@ private:
     void sendLoginFrame();
     void scheduleReconnect();
     void setState(ConnectionState newState);
-    Q_INVOKABLE QVariant parseFrame(const QByteArray &data);
+    Q_INVOKABLE int parseFrame(const QByteArray &data);
+    void handleFrame(FrameType type);
 
     QWebSocket *m_webSocket;
     QTimer *m_reconnectTimer;

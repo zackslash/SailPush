@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QSet>
 #include "message.h"
 
 class MessageStore : public QObject {
@@ -17,7 +18,6 @@ public:
     bool save() const;
 
     QList<Message> messages() const { return m_messages; }
-    QList<Message> unreadMessages() const;
     int unreadCount() const;
     int totalCount() const { return m_messages.size(); }
 
@@ -26,9 +26,6 @@ public:
     void markAllAsRead();
     void removeMessage(const QString &id);
 
-    QString highestMessageId() const;
-    int maxMessages() const { return m_maxMessages; }
-
     bool containsMessage(const QString &id) const;
 
 private:
@@ -36,6 +33,7 @@ private:
     QString storagePath() const;
 
     QList<Message> m_messages;
+    QSet<QString> m_idSet;
     QString m_dataPath;
     int m_maxMessages;
 };

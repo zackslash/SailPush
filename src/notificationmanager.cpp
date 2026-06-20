@@ -1,4 +1,5 @@
 #include "notificationmanager.h"
+#include "constants.h"
 #include <QCoreApplication>
 #include <QDBusInterface>
 #include <QDBusReply>
@@ -9,6 +10,7 @@
 #include <QFile>
 #include <QDir>
 #include <QStandardPaths>
+#include <QList>
 
 Q_LOGGING_CATEGORY(lcNotification, "com.zackslash.sailpush.notification")
 
@@ -23,8 +25,11 @@ NotificationManager::NotificationManager(const QString &cachePath, QObject *pare
     , m_cachePath(cachePath)
 {
     QDBusConnection::sessionBus().connect(DBUS_SERVICE, DBUS_PATH, DBUS_IFACE,
-                                          "ActionInvoked", this,
-                                          SLOT(onActionInvoked(uint, QString)));
+                                           "ActionInvoked", this,
+                                           SLOT(onActionInvoked(uint, QString)));
+    QDBusConnection::sessionBus().connect(DBUS_SERVICE, DBUS_PATH, DBUS_IFACE,
+                                           "NotificationClosed", this,
+                                           SLOT(onNotificationClosed(uint, uint)));
 }
 
 void NotificationManager::publishNotification(const Message &msg, int unreadCount, bool displayOn)
@@ -116,6 +121,13 @@ void NotificationManager::onActionInvoked(uint id, const QString &actionKey)
     }
 }
 
+void NotificationManager::onNotificationClosed(uint id, uint reason)
+{
+    Q_UNUSED(reason);
+    m_notificationMessageMap.remove(id);
+    m_notificationReceiptMap.remove(id);
+}
+
 QString NotificationManager::truncate(const QString &text, int maxLength)
 {
     if (text.length() <= maxLength) return text;
@@ -146,13 +158,24 @@ QString NotificationManager::stripHtml(const QString &html)
     text.replace("&mdash;", "\u2014");
     text.replace("&ndash;", "\u2013");
     text.replace("&hellip;", "\u2026");
-    // Numeric entities — safe to loop since replacements are single chars
-    QRegularExpressionMatch m;
-    while ((m = hexEntityRe.match(text)).hasMatch()) {
+    // Numeric entities — single pass using globalMatch, replacing in reverse
+    // order so earlier captured positions remain valid after each replacement.
+    QList<QRegularExpressionMatch> hexMatches;
+    auto it = hexEntityRe.globalMatch(text);
+    while (it.hasNext())
+        hexMatches.append(it.next());
+    for (int i = hexMatches.size() - 1; i >= 0; --i) {
+        const auto &m = hexMatches[i];
         text.replace(m.capturedStart(), m.capturedLength(),
                      QChar(m.captured(1).toUInt(nullptr, 16)));
     }
-    while ((m = decEntityRe.match(text)).hasMatch()) {
+
+    QList<QRegularExpressionMatch> decMatches;
+    it = decEntityRe.globalMatch(text);
+    while (it.hasNext())
+        decMatches.append(it.next());
+    for (int i = decMatches.size() - 1; i >= 0; --i) {
+        const auto &m = decMatches[i];
         text.replace(m.capturedStart(), m.capturedLength(),
                      QChar(m.captured(1).toUInt()));
     }
@@ -208,7 +231,7 @@ void NotificationManager::trackNotification(uint notifId, const Message &msg)
 
 void NotificationManager::writePendingOpenMessage(const QString &messageId)
 {
-    QString path = m_cachePath + "/pending_open";
+    QString path = m_cachePath + SailPushPaths::PENDING_OPEN;
     QFile file(path);
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         file.write(messageId.toUtf8());

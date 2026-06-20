@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariantMap>
+#include <functional>
 #include "message.h"
 #include "messagestore.h"
 #include "websocketmanager.h"
@@ -87,6 +88,8 @@ private:
     QString wsStateToString(WebSocketManager::ConnectionState state) const;
 
     void refreshAutoStartCache();
+    void runSystemctl(const QStringList &args,
+                      std::function<void(int, const QString &, const QString &)> callback);
 
     MessageStore *m_store;
     WebSocketManager *m_wsManager;

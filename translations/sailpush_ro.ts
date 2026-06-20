@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Datele de conectare salvate nu au putut fi decriptate. Acest lucru se poate întâmpla după o actualizare de sistem. Vă rugăm să vă autentificați din nou.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Serviciul secrets nu este disponibil. Reporniți dispozitivul și încercați din nou.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

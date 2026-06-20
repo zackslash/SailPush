@@ -18,8 +18,8 @@ LoginHelper::LoginHelper(QObject *parent)
     , m_registering(false)
     , m_needsTwoFactor(false)
 {
-    QString secret, deviceId, userKey, deviceName;
-    if (!m_store->load(secret, deviceId, userKey, deviceName)) {
+    QString secret, deviceId;
+    if (!m_store->load(secret, deviceId)) {
         ICredentialStore::LoadError err = m_store->lastError();
         if (err == ICredentialStore::LoadError::InvalidFormat) {
             m_migrationReason = tr("App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.");
@@ -54,9 +54,7 @@ void LoginHelper::cancel()
     setNeedsTwoFactor(false);
     setErrorString(QString());
 
-    m_pendingUserKey.clear();
     m_pendingSecret.clear();
-    m_pendingDeviceName.clear();
 }
 
 void LoginHelper::logout()
@@ -77,13 +75,12 @@ void LoginHelper::setMigrationReason(const QString &reason)
 void LoginHelper::onLoginSuccess(const QString &userKey, const QString &secret)
 {
     qCInfo(lcLoginHelper) << "Login successful, registering device";
-    m_pendingUserKey = userKey;
+    Q_UNUSED(userKey)
     m_pendingSecret = secret;
     setLoggingIn(false);
     setRegistering(true);
 
-    m_pendingDeviceName = generateDeviceName();
-    m_client->registerDevice(secret, m_pendingDeviceName);
+    m_client->registerDevice(secret, generateDeviceName());
 }
 
 void LoginHelper::onLoginFailed(const QString &error)
@@ -107,7 +104,7 @@ void LoginHelper::onDeviceRegistered(const QString &deviceId)
     qCInfo(lcLoginHelper) << "Device registered:" << deviceId;
     setRegistering(false);
 
-    bool saved = m_store->save(m_pendingSecret, deviceId, m_pendingUserKey, m_pendingDeviceName);
+    bool saved = m_store->save(m_pendingSecret, deviceId);
     if (saved) {
         qCInfo(lcLoginHelper) << "Credentials saved successfully";
         if (!m_migrationReason.isEmpty()) {
@@ -121,9 +118,7 @@ void LoginHelper::onDeviceRegistered(const QString &deviceId)
         emit loginFailed(tr("Failed to save credentials"));
     }
 
-    m_pendingUserKey.clear();
     m_pendingSecret.clear();
-    m_pendingDeviceName.clear();
 }
 
 void LoginHelper::onDeviceRegistrationFailed(const QString &error)
@@ -133,9 +128,7 @@ void LoginHelper::onDeviceRegistrationFailed(const QString &error)
     setErrorString(error);
     emit loginFailed(error);
 
-    m_pendingUserKey.clear();
     m_pendingSecret.clear();
-    m_pendingDeviceName.clear();
 }
 
 void LoginHelper::setLoggingIn(bool value)

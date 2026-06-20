@@ -93,7 +93,7 @@ bool CredentialStore::checkSecretExists()
     return gsr.result().errorCode() == Sailfish::Secrets::Result::NoError;
 }
 
-bool CredentialStore::save(const QString &secret, const QString &deviceId, const QString &userKey, const QString &deviceName)
+bool CredentialStore::save(const QString &secret, const QString &deviceId)
 {
     if (!m_manager.isInitialized()) {
         m_lastError = LoadError::BackendUnavailable;
@@ -108,8 +108,6 @@ bool CredentialStore::save(const QString &secret, const QString &deviceId, const
     QJsonObject obj;
     obj.insert("secret", secret);
     obj.insert("device_id", deviceId);
-    obj.insert("user_key", userKey);
-    obj.insert("device_name", deviceName);
     QByteArray jsonData = QJsonDocument(obj).toJson(QJsonDocument::Compact);
 
     // Delete existing secret first (save() must succeed even if secret already exists)
@@ -153,7 +151,7 @@ bool CredentialStore::save(const QString &secret, const QString &deviceId, const
     return true;
 }
 
-bool CredentialStore::load(QString &secret, QString &deviceId, QString &userKey, QString &deviceName)
+bool CredentialStore::load(QString &secret, QString &deviceId)
 {
     m_lastError = LoadError::None;
 
@@ -206,8 +204,6 @@ bool CredentialStore::load(QString &secret, QString &deviceId, QString &userKey,
     QJsonObject obj = doc.object();
     secret = obj.value("secret").toString();
     deviceId = obj.value("device_id").toString();
-    userKey = obj.value("user_key").toString();
-    deviceName = obj.value("device_name").toString();
 
     if (secret.isEmpty() || deviceId.isEmpty()) {
         qCWarning(lcCredentialStore) << "Stored credentials have empty required fields";

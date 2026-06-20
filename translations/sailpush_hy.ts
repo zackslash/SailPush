@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Պահպանված մուտքագրման տվյալները չհաջողվեց վերծանել: Սա կարող է տեղի ունենալ համակարգի թարմացումից հետո: Խնդրում ենք կրկին մուտք գործել:</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets ծառայությունը հասանելի չէ: Վերագործարկեք սարքը և կրկին փորձեք:</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>
@@ -337,7 +341,7 @@ mcetool --set-suspend-policy=early</translation>
         </message>
         <message>
             <source>This will clear your credentials and stop the background service. Are you sure?</source>
-            <translation>Սա կջնջի Ձեր մուտքագրման տվյալները և կդադարեցնի ֆոնային ծառայությունը: Համոզված եք:</translation>
+            <translation>Սա կջնջի Ձեր մուտքագրման տվյալները և կդադարեցնի ֆոնային ծառայությունը: Համոզված ե՞ք</translation>
         </message>
         <message>
             <source>Unofficial Pushover Open Client for SailfishOS.

@@ -34,6 +34,7 @@ signals:
 
 private slots:
     void onActionInvoked(uint id, const QString &actionKey);
+    void onNotificationClosed(uint id, uint reason);
 
 private:
     void trackNotification(uint notifId, const Message &msg);

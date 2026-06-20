@@ -17,8 +17,8 @@ WebSocketManager::WebSocketManager(QObject *parent)
     connect(m_webSocket, &QWebSocket::disconnected, this, &WebSocketManager::onDisconnected);
     connect(m_webSocket, &QWebSocket::textMessageReceived, this, &WebSocketManager::onTextMessageReceived);
     connect(m_webSocket, &QWebSocket::binaryMessageReceived, this, &WebSocketManager::onBinaryMessageReceived);
-    connect(m_webSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(onError(QAbstractSocket::SocketError)));
+    connect(m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+            this, &WebSocketManager::onError);
     connect(m_reconnectTimer, &QTimer::timeout, this, &WebSocketManager::onReconnectTimer);
 }
 
@@ -46,6 +46,8 @@ void WebSocketManager::disconnectFromServer()
     m_autoReconnect = false;
     m_reconnectTimer->stop();
     m_webSocket->close();
+    m_secret.clear();
+    m_deviceId.clear();
     setState(ConnectionState::Disconnected);
 }
 
@@ -75,9 +77,19 @@ void WebSocketManager::onDisconnected()
 
 void WebSocketManager::onTextMessageReceived(const QString &message)
 {
-    FrameType frame = static_cast<FrameType>(parseFrame(message.toUtf8()).toInt());
+    FrameType frame = static_cast<FrameType>(parseFrame(message.toUtf8()));
+    handleFrame(frame);
+}
 
-    switch (frame) {
+void WebSocketManager::onBinaryMessageReceived(const QByteArray &message)
+{
+    FrameType frame = static_cast<FrameType>(parseFrame(message));
+    handleFrame(frame);
+}
+
+void WebSocketManager::handleFrame(FrameType type)
+{
+    switch (type) {
     case FrameType::NewMessage:
         qCInfo(lcWebSocket) << "New message available";
         emit newMessageAvailable();
@@ -99,31 +111,7 @@ void WebSocketManager::onTextMessageReceived(const QString &message)
     case FrameType::KeepAlive:
         break;
     case FrameType::Unknown:
-        qCDebug(lcWebSocket) << "Unknown frame received:" << message;
-        break;
-    }
-}
-
-void WebSocketManager::onBinaryMessageReceived(const QByteArray &message)
-{
-    FrameType frame = static_cast<FrameType>(parseFrame(message).toInt());
-
-    switch (frame) {
-    case FrameType::NewMessage:
-        emit newMessageAvailable();
-        break;
-    case FrameType::Reload:
-        emit reloadRequested();
-        break;
-    case FrameType::Error:
-        m_autoReconnect = false;
-        emit connectionError(QStringLiteral("Permanent server error."));
-        break;
-    case FrameType::SessionClosedByServer:
-        m_autoReconnect = false;
-        emit sessionClosedByServer();
-        break;
-    default:
+        qCDebug(lcWebSocket) << "Unknown frame received";
         break;
     }
 }
@@ -170,7 +158,7 @@ void WebSocketManager::setState(ConnectionState newState)
     }
 }
 
-QVariant WebSocketManager::parseFrame(const QByteArray &data)
+int WebSocketManager::parseFrame(const QByteArray &data)
 {
     if (data.isEmpty()) return static_cast<int>(FrameType::Unknown);
 

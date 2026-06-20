@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Il-kredenzjali maħżuna ma setgħux jiġu deċifrati. Dan jista' jiġri wara aġġornament tas-sistema. Jekk jogħġbok erġa' idħol.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Is-servizz tas-secrets mhuwiex disponibbli. Erġa' ibda l-apparat u erġa' pprova.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

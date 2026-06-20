@@ -12,6 +12,17 @@ Q_LOGGING_CATEGORY(lcDaemon, "com.zackslash.sailpush.daemon")
 static const int WS_DISCONNECT_TIMEOUT_MS = 30000;
 static const int DEFAULT_POLLING_INTERVAL_MS = 5 * 60 * 1000;
 
+static int pollingIntervalFromIndex(int index)
+{
+    switch (index) {
+    case 0: return 60 * 1000;
+    case 1: return 5 * 60 * 1000;
+    case 2: return 15 * 60 * 1000;
+    case 3: return 30 * 60 * 1000;
+    default: return DEFAULT_POLLING_INTERVAL_MS;
+    }
+}
+
 QString Daemon::dataPath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
@@ -112,8 +123,8 @@ void Daemon::start()
         qCWarning(lcDaemon) << "Failed to register D-Bus service, continuing anyway";
     }
 
-    QString secret, deviceId, userKey, deviceName;
-    if (m_credentials->load(secret, deviceId, userKey, deviceName)) {
+    QString secret, deviceId;
+    if (m_credentials->load(secret, deviceId)) {
         m_secret = secret;
         m_deviceId = deviceId;
         m_credentialsLoaded = true;
@@ -141,14 +152,7 @@ void Daemon::loadSettings()
 
     m_pollingEnabled = settings.value("pollingFallback", true).toBool();
     int intervalIndex = settings.value("pollingIntervalIndex", 1).toInt();
-
-    switch (intervalIndex) {
-    case 0: m_pollingIntervalMs = 60 * 1000; break;
-    case 1: m_pollingIntervalMs = 5 * 60 * 1000; break;
-    case 2: m_pollingIntervalMs = 15 * 60 * 1000; break;
-    case 3: m_pollingIntervalMs = 30 * 60 * 1000; break;
-    default: m_pollingIntervalMs = DEFAULT_POLLING_INTERVAL_MS; break;
-    }
+    m_pollingIntervalMs = pollingIntervalFromIndex(intervalIndex);
 
     qCInfo(lcDaemon) << "Settings loaded: polling=" << m_pollingEnabled << "interval=" << m_pollingIntervalMs;
 
@@ -175,10 +179,6 @@ void Daemon::performSync()
         m_cpuKeepalive->start();
     }
     m_client->downloadMessages(m_secret, m_deviceId);
-
-    if (!m_startupSyncDone) {
-        m_startupSyncDone = true;
-    }
 }
 
 void Daemon::deleteMessagesUpTo(const QString &highestId)
@@ -208,14 +208,6 @@ void Daemon::publishNotificationForMessage(const Message &msg, bool isNew)
     }
 }
 
-void Daemon::handleEmergencyMessage(const Message &msg)
-{
-    if (msg.isEmergency() && !msg.acked) {
-        qCInfo(lcDaemon) << "Emergency message detected:" << msg.id;
-        publishNotificationForMessage(msg, true);
-    }
-}
-
 void Daemon::onDeviceRegistered(const QString &deviceId)
 {
     qCInfo(lcDaemon) << "Device registered:" << deviceId;
@@ -240,7 +232,10 @@ void Daemon::onMessagesDownloaded(const QList<Message> &messages)
         if (!m_store->containsMessage(msg.id)) {
             m_store->addMessage(msg);
             newMessages.append(msg);
-            handleEmergencyMessage(msg);
+            if (msg.isEmergency() && !msg.acked) {
+                qCInfo(lcDaemon) << "Emergency message detected:" << msg.id;
+                publishNotificationForMessage(msg, true);
+            }
         }
     }
 
@@ -254,7 +249,10 @@ void Daemon::onMessagesDownloaded(const QList<Message> &messages)
 
     if (!newMessages.isEmpty() && m_startupSyncDone) {
         for (const Message &msg : newMessages) {
-            if (m_systemNotifications) {
+            // Emergency messages already received a notification in the
+            // inline check above; skip the redundant notification here
+            // while still signalling the UI that a new message arrived.
+            if (m_systemNotifications && !msg.isEmergency()) {
                 publishNotificationForMessage(msg, true);
             }
             m_dbus->onMessageReceived(msg);
@@ -265,6 +263,7 @@ void Daemon::onMessagesDownloaded(const QList<Message> &messages)
         qCInfo(lcDaemon) << "Connecting WebSocket after sync";
         m_wsManager->connectToServer(m_deviceId, m_secret);
     }
+    m_startupSyncDone = true;
     updateDiagnostics();
 }
 
@@ -300,14 +299,6 @@ void Daemon::onMessagesDownloadFailed(const QString &error)
 void Daemon::onMessagesDeleted()
 {
     qCInfo(lcDaemon) << "Messages deleted from server";
-    if (!m_pendingDeleteIds.isEmpty()) {
-        for (const QString &id : m_pendingDeleteIds) {
-            m_store->removeMessage(id);
-        }
-        m_store->save();
-        m_dbus->notifyUnreadCountChanged();
-        m_pendingDeleteIds.clear();
-    }
 }
 
 void Daemon::onMessageDeleteFailed(const QString &error)
@@ -422,8 +413,8 @@ void Daemon::onDbusRequestSync()
 void Daemon::onDbusRequestReloadCredentials()
 {
     qCInfo(lcDaemon) << "D-Bus: reloading credentials";
-    QString secret, deviceId, userKey, deviceName;
-    if (m_credentials->load(secret, deviceId, userKey, deviceName)) {
+    QString secret, deviceId;
+    if (m_credentials->load(secret, deviceId)) {
         m_secret = secret;
         m_deviceId = deviceId;
         m_credentialsLoaded = true;
@@ -458,14 +449,7 @@ void Daemon::onDbusRequestUpdateSettings(const QVariantMap &settings)
         m_pollingEnabled = settings.value("pollingFallback").toBool();
     }
     if (settings.contains("pollingIntervalIndex")) {
-        int intervalIndex = settings.value("pollingIntervalIndex").toInt();
-        switch (intervalIndex) {
-        case 0: m_pollingIntervalMs = 60 * 1000; break;
-        case 1: m_pollingIntervalMs = 5 * 60 * 1000; break;
-        case 2: m_pollingIntervalMs = 15 * 60 * 1000; break;
-        case 3: m_pollingIntervalMs = 30 * 60 * 1000; break;
-        default: m_pollingIntervalMs = DEFAULT_POLLING_INTERVAL_MS; break;
-        }
+        m_pollingIntervalMs = pollingIntervalFromIndex(settings.value("pollingIntervalIndex").toInt());
     }
     if (settings.contains("preventDeepSleep")) {
         m_preventDeepSleep = settings.value("preventDeepSleep").toBool();
@@ -497,9 +481,9 @@ void Daemon::onDbusRequestAcknowledge(const QString &receipt)
 void Daemon::onDbusRequestDeleteMessage(const QString &messageId)
 {
     qCInfo(lcDaemon) << "D-Bus: delete message:" << messageId;
-    // Track for deletion after server confirms
-    m_pendingDeleteIds.insert(messageId);
-    m_client->deleteMessages(m_secret, m_deviceId, messageId);
+    m_store->removeMessage(messageId);
+    m_store->save();
+    m_dbus->notifyUnreadCountChanged();
 }
 
 void Daemon::onDbusRequestQuit()
@@ -508,49 +492,42 @@ void Daemon::onDbusRequestQuit()
     QCoreApplication::quit();
 }
 
+bool Daemon::isUiRunning()
+{
+    const qint64 myPid = QCoreApplication::applicationPid();
+    QDir procDir("/proc");
+    for (const QString &entry : procDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        bool ok;
+        const qint64 pid = entry.toLongLong(&ok);
+        if (!ok || pid == myPid)
+            continue;
+        QFile cmdlineFile(QStringLiteral("/proc/%1/cmdline").arg(pid));
+        if (!cmdlineFile.open(QIODevice::ReadOnly))
+            continue;
+        const QByteArray cmdline = cmdlineFile.readAll();
+        if ((cmdline.startsWith("sailpush") || cmdline.startsWith("/usr/bin/sailpush"))
+                && !cmdline.contains("--daemon")) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Daemon::onDbusRequestOpenMessage(const QString &messageId)
 {
     qCInfo(lcDaemon) << "D-Bus: open message requested:" << messageId;
 
-    // Write pending file so the app can read it on startup
     m_notificationManager->writePendingOpenMessage(messageId);
-
-    // Emit signal for warm-start case (UI already running and receives this)
     m_dbus->notifyOpenMessageRequested(messageId);
 
-    // Check if the UI is already running by scanning /proc for another
-    // sailpush process besides our own (the daemon).
-    // If it is, the D-Bus signal above is sufficient — don't spawn a duplicate.
-    // If it's not, launch via invoker for cold start.
-    bool uiRunning = false;
-    qint64 myPid = QCoreApplication::applicationPid();
-    QDir procDir("/proc");
-    for (const QString &entry : procDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        bool ok;
-        qint64 pid = entry.toLongLong(&ok);
-        if (!ok || pid == myPid) continue;
-
-        QFile cmdlineFile(QStringLiteral("/proc/%1/cmdline").arg(pid));
-        if (cmdlineFile.open(QIODevice::ReadOnly)) {
-            QByteArray cmdline = cmdlineFile.readAll();
-            // Match UI process: starts with "sailpush" but is NOT a daemon instance
-            if ((cmdline.startsWith("sailpush") || cmdline.startsWith("/usr/bin/sailpush"))
-                    && !cmdline.contains("--daemon")) {
-                uiRunning = true;
-                break;
-            }
-        }
-    }
-
-    if (!uiRunning) {
-        // Cold start: launch the app via invoker
+    if (isUiRunning()) {
+        qCInfo(lcDaemon) << "UI already running, relying on D-Bus signal";
+    } else {
         QTimer::singleShot(0, this, [this]() {
             qCInfo(lcDaemon) << "Activating app via invoker (cold start)";
             QProcess::startDetached("/usr/bin/invoker",
                 QStringList() << "--type=silica-qt5" << "/usr/bin/sailpush");
         });
-    } else {
-        qCInfo(lcDaemon) << "UI already running, relying on D-Bus signal";
     }
 }
 
@@ -579,7 +556,6 @@ void Daemon::updateDiagnostics()
     diag["wsDisconnectTimerActive"] = m_wsDisconnectTimer->isActive();
     diag["secretPresent"] = !m_secret.isEmpty();
     diag["deviceIdPresent"] = !m_deviceId.isEmpty();
-    diag["pendingDeletes"] = m_pendingDeleteIds.size();
     if (!m_credentialError.isEmpty()) {
         diag["credentialError"] = m_credentialError;
     }

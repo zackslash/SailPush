@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Gordetako kredentzialak ezin izan dira deszifratu. Hau sistema eguneratu baten ondoren gerta daiteke. Hasi saioa berriro.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets zerbitzua ez dago erabilgarri. Berrabiarazi gailua eta saiatu berriro.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

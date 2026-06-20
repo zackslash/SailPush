@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Зачуваните акредитиви не можеа да се декриптираат. Ова може да се случи по ажурирање на системот. Ве молиме, најавете се повторно.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Сервисот secrets не е достапен. Рестартирајте го уредот и обидете се повторно.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

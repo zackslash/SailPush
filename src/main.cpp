@@ -27,19 +27,20 @@ static const QString DBUS_SERVICE = "com.zackslash.sailpush";
 static void loadTranslations(QCoreApplication *app)
 {
     QLocale locale = QLocale::system();
+    const QString localeName = locale.name();
     auto *translator = new QTranslator(app);
     QString transDir = SailfishApp::pathTo("translations").toLocalFile();
-    if (translator->load(locale.name(), "sailpush", "_", transDir)) {
+    if (translator->load(localeName, "sailpush", "_", transDir)) {
         app->installTranslator(translator);
-        qCInfo(lcMain) << "Loaded translations for" << locale.name();
+        qCInfo(lcMain) << "Loaded translations for" << localeName;
     } else {
         // Try language-only (e.g. "de" from "de_DE")
-        QString lang = locale.name().left(locale.name().indexOf('_'));
+        QString lang = localeName.left(localeName.indexOf('_'));
         if (!lang.isEmpty() && translator->load(lang, "sailpush", "_", transDir)) {
             app->installTranslator(translator);
             qCInfo(lcMain) << "Loaded translations for" << lang;
         } else {
-            qCInfo(lcMain) << "No translations found for" << locale.name() << "- using English";
+            qCInfo(lcMain) << "No translations found for" << localeName << "- using English";
             delete translator;
         }
     }

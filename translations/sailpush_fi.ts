@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Tallennettuja kirjautumistietoja ei voitu purkaa. Tämä voi tapahtua järjestelmäpäivityksen jälkeen. Kirjaudu sisään uudelleen.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Secrets-palvelu ei ole käytettävissä. Käynnistä laite uudelleen ja yritä uudelleen.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

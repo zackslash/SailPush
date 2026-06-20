@@ -62,6 +62,10 @@
             <source>Saved credentials could not be decrypted. This can happen after a system update. Please log in again.</source>
             <translation>Kredencialet e ruajtura nuk mund të deshifroheshin. Kjo mund të ndodhë pas një përditësimi të sistemit. Ju lutemi, hyni përsëri.</translation>
         </message>
+        <message>
+            <source>Secrets service is not available. Please restart the device and try again.</source>
+            <translation>Shërbimi i secrets nuk është i disponueshëm. Rinisni pajisjen dhe provoni përsëri.</translation>
+        </message>
     </context>
     <context>
         <name>LoginPage</name>

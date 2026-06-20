@@ -41,9 +41,13 @@ bool MessageStore::load()
     }
 
     m_messages.clear();
+    m_idSet.clear();
     QJsonArray array = doc.array();
     for (const QJsonValue &v : array) {
         m_messages.append(Message::fromJson(v.toObject()));
+    }
+    for (const Message &msg : m_messages) {
+        m_idSet.insert(msg.id);
     }
 
     qCInfo(lcMessageStore) << "Loaded" << m_messages.size() << "messages from store";
@@ -80,17 +84,6 @@ bool MessageStore::save() const
     return true;
 }
 
-QList<Message> MessageStore::unreadMessages() const
-{
-    QList<Message> unread;
-    for (const Message &msg : m_messages) {
-        if (!msg.read) {
-            unread.append(msg);
-        }
-    }
-    return unread;
-}
-
 int MessageStore::unreadCount() const
 {
     int count = 0;
@@ -104,20 +97,22 @@ int MessageStore::unreadCount() const
 
 void MessageStore::addMessage(const Message &msg)
 {
-    if (containsMessage(msg.id)) {
+    if (m_idSet.contains(msg.id)) {
         return;
     }
     m_messages.prepend(msg);
+    m_idSet.insert(msg.id);
     trimMessages();
 }
 
 void MessageStore::markAsRead(const QString &id)
 {
+    if (!m_idSet.contains(id)) {
+        return;
+    }
     for (int i = 0; i < m_messages.size(); ++i) {
         if (m_messages[i].id == id) {
-            Message msg = m_messages[i];
-            msg.read = true;
-            m_messages[i] = msg;
+            m_messages[i].read = true;
             break;
         }
     }
@@ -126,43 +121,33 @@ void MessageStore::markAsRead(const QString &id)
 void MessageStore::markAllAsRead()
 {
     for (int i = 0; i < m_messages.size(); ++i) {
-        Message msg = m_messages[i];
-        msg.read = true;
-        m_messages[i] = msg;
+        m_messages[i].read = true;
     }
 }
 
 void MessageStore::removeMessage(const QString &id)
 {
+    if (!m_idSet.contains(id)) {
+        return;
+    }
     for (int i = 0; i < m_messages.size(); ++i) {
         if (m_messages[i].id == id) {
             m_messages.removeAt(i);
             break;
         }
     }
-}
-
-QString MessageStore::highestMessageId() const
-{
-    if (m_messages.isEmpty()) {
-        return QString();
-    }
-    return m_messages.first().id;
+    m_idSet.remove(id);
 }
 
 bool MessageStore::containsMessage(const QString &id) const
 {
-    for (const Message &msg : m_messages) {
-        if (msg.id == id) {
-            return true;
-        }
-    }
-    return false;
+    return m_idSet.contains(id);
 }
 
 void MessageStore::trimMessages()
 {
     while (m_messages.size() > m_maxMessages) {
+        m_idSet.remove(m_messages.last().id);
         m_messages.removeLast();
     }
 }

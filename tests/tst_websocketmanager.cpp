@@ -24,12 +24,12 @@ void TestWebSocketManager::testParseKeepAlive()
 {
     m_manager = new WebSocketManager(this);
 
-    QVariant result;
+    int result;
     QMetaObject::invokeMethod(m_manager, "parseFrame",
-        Q_RETURN_ARG(QVariant, result),
+        Q_RETURN_ARG(int, result),
         Q_ARG(QByteArray, QByteArray("#")));
 
-    QCOMPARE(result.toInt(), static_cast<int>(WebSocketManager::FrameType::KeepAlive));
+    QCOMPARE(result, static_cast<int>(WebSocketManager::FrameType::KeepAlive));
     delete m_manager;
 }
 
@@ -37,12 +37,12 @@ void TestWebSocketManager::testParseNewMessage()
 {
     m_manager = new WebSocketManager(this);
 
-    QVariant result;
+    int result;
     QMetaObject::invokeMethod(m_manager, "parseFrame",
-        Q_RETURN_ARG(QVariant, result),
+        Q_RETURN_ARG(int, result),
         Q_ARG(QByteArray, QByteArray("!")));
 
-    QCOMPARE(result.toInt(), static_cast<int>(WebSocketManager::FrameType::NewMessage));
+    QCOMPARE(result, static_cast<int>(WebSocketManager::FrameType::NewMessage));
     delete m_manager;
 }
 
@@ -50,12 +50,12 @@ void TestWebSocketManager::testParseReload()
 {
     m_manager = new WebSocketManager(this);
 
-    QVariant result;
+    int result;
     QMetaObject::invokeMethod(m_manager, "parseFrame",
-        Q_RETURN_ARG(QVariant, result),
+        Q_RETURN_ARG(int, result),
         Q_ARG(QByteArray, QByteArray("R")));
 
-    QCOMPARE(result.toInt(), static_cast<int>(WebSocketManager::FrameType::Reload));
+    QCOMPARE(result, static_cast<int>(WebSocketManager::FrameType::Reload));
     delete m_manager;
 }
 
@@ -63,12 +63,12 @@ void TestWebSocketManager::testParseError()
 {
     m_manager = new WebSocketManager(this);
 
-    QVariant result;
+    int result;
     QMetaObject::invokeMethod(m_manager, "parseFrame",
-        Q_RETURN_ARG(QVariant, result),
+        Q_RETURN_ARG(int, result),
         Q_ARG(QByteArray, QByteArray("E")));
 
-    QCOMPARE(result.toInt(), static_cast<int>(WebSocketManager::FrameType::Error));
+    QCOMPARE(result, static_cast<int>(WebSocketManager::FrameType::Error));
     delete m_manager;
 }
 
@@ -76,12 +76,12 @@ void TestWebSocketManager::testParseSessionClosed()
 {
     m_manager = new WebSocketManager(this);
 
-    QVariant result;
+    int result;
     QMetaObject::invokeMethod(m_manager, "parseFrame",
-        Q_RETURN_ARG(QVariant, result),
+        Q_RETURN_ARG(int, result),
         Q_ARG(QByteArray, QByteArray("A")));
 
-    QCOMPARE(result.toInt(), static_cast<int>(WebSocketManager::FrameType::SessionClosedByServer));
+    QCOMPARE(result, static_cast<int>(WebSocketManager::FrameType::SessionClosedByServer));
     delete m_manager;
 }
 
@@ -89,12 +89,12 @@ void TestWebSocketManager::testParseUnknown()
 {
     m_manager = new WebSocketManager(this);
 
-    QVariant result;
+    int result;
     QMetaObject::invokeMethod(m_manager, "parseFrame",
-        Q_RETURN_ARG(QVariant, result),
+        Q_RETURN_ARG(int, result),
         Q_ARG(QByteArray, QByteArray("X")));
 
-    QCOMPARE(result.toInt(), static_cast<int>(WebSocketManager::FrameType::Unknown));
+    QCOMPARE(result, static_cast<int>(WebSocketManager::FrameType::Unknown));
     delete m_manager;
 }
 
@@ -102,12 +102,12 @@ void TestWebSocketManager::testParseEmpty()
 {
     m_manager = new WebSocketManager(this);
 
-    QVariant result;
+    int result;
     QMetaObject::invokeMethod(m_manager, "parseFrame",
-        Q_RETURN_ARG(QVariant, result),
+        Q_RETURN_ARG(int, result),
         Q_ARG(QByteArray, QByteArray()));
 
-    QCOMPARE(result.toInt(), static_cast<int>(WebSocketManager::FrameType::Unknown));
+    QCOMPARE(result, static_cast<int>(WebSocketManager::FrameType::Unknown));
     delete m_manager;
 }
 

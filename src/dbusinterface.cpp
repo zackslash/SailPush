@@ -1,4 +1,5 @@
 #include "dbusinterface.h"
+#include "constants.h"
 #include <QDBusConnection>
 #include <QDBusError>
 #include <QLoggingCategory>
@@ -148,7 +149,7 @@ void DbusInterface::OpenMessage(const QString &messageId)
 
 QString DbusInterface::GetPendingOpenMessage()
 {
-    QString path = m_cachePath + "/pending_open";
+    QString path = m_cachePath + SailPushPaths::PENDING_OPEN;
     QFile file(path);
     if (file.open(QIODevice::ReadOnly)) {
         QString messageId = QString::fromUtf8(file.readAll()).trimmed();
@@ -217,21 +218,31 @@ void DbusInterface::notifyUnreadCountChanged()
     emit unreadCountChanged();
 }
 
-void DbusInterface::refreshAutoStartCache()
+void DbusInterface::runSystemctl(const QStringList &args,
+                                  std::function<void(int, const QString &, const QString &)> callback)
 {
     QProcess *proc = new QProcess(this);
     connect(proc, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-            this, [this, proc](int exitCode, QProcess::ExitStatus) {
-        Q_UNUSED(exitCode);
-        m_autoStartEnabled = QString::fromUtf8(proc->readAllStandardOutput()).trimmed() == "enabled";
-        qCInfo(lcDbus) << "AutoStart cache refreshed:" << m_autoStartEnabled;
+            this, [this, proc, callback](int exitCode, QProcess::ExitStatus) {
+        QString stdOut = QString::fromUtf8(proc->readAllStandardOutput()).trimmed();
+        QString stdErr = QString::fromUtf8(proc->readAllStandardError()).trimmed();
+        callback(exitCode, stdOut, stdErr);
         proc->deleteLater();
     });
     connect(proc, &QProcess::errorOccurred, this, [this, proc](QProcess::ProcessError) {
-        qCWarning(lcDbus) << "Failed to check autostart status:" << proc->errorString();
+        qCWarning(lcDbus) << "systemctl failed:" << proc->errorString();
         proc->deleteLater();
     });
-    proc->start("/usr/bin/systemctl", {"--user", "is-enabled", "sailpush"});
+    proc->start("/usr/bin/systemctl", args);
+}
+
+void DbusInterface::refreshAutoStartCache()
+{
+    runSystemctl({"--user", "is-enabled", "sailpush"},
+        [this](int, const QString &stdOut, const QString &) {
+            m_autoStartEnabled = (stdOut == "enabled");
+            qCInfo(lcDbus) << "AutoStart cache refreshed:" << m_autoStartEnabled;
+        });
 }
 
 bool DbusInterface::GetAutoStartEnabled()
@@ -242,26 +253,17 @@ bool DbusInterface::GetAutoStartEnabled()
 void DbusInterface::SetAutoStartEnabled(bool enabled)
 {
     qCInfo(lcDbus) << "Setting AutoStart to" << enabled;
-    QProcess *proc = new QProcess(this);
-    connect(proc, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-            this, [this, proc, enabled](int exitCode, QProcess::ExitStatus) {
-        QString stdOut = QString::fromUtf8(proc->readAllStandardOutput()).trimmed();
-        QString stdErr = QString::fromUtf8(proc->readAllStandardError()).trimmed();
-        if (!stdOut.isEmpty()) qCInfo(lcDbus) << "systemctl stdout:" << stdOut;
-        if (!stdErr.isEmpty()) qCWarning(lcDbus) << "systemctl stderr:" << stdErr;
-        if (exitCode != 0) {
-            qCWarning(lcDbus) << "systemctl exit code:" << exitCode;
-        } else {
-            m_autoStartEnabled = enabled;
-            qCInfo(lcDbus) << "AutoStart cache updated:" << m_autoStartEnabled;
-        }
-        proc->deleteLater();
-    });
-    connect(proc, &QProcess::errorOccurred, this, [this, proc](QProcess::ProcessError) {
-        qCWarning(lcDbus) << "Failed to set autostart:" << proc->errorString();
-        proc->deleteLater();
-    });
-    proc->start("/usr/bin/systemctl", {"--user", enabled ? "enable" : "disable", "sailpush"});
+    runSystemctl({"--user", enabled ? "enable" : "disable", "sailpush"},
+        [this, enabled](int exitCode, const QString &stdOut, const QString &stdErr) {
+            if (!stdOut.isEmpty()) qCInfo(lcDbus) << "systemctl stdout:" << stdOut;
+            if (!stdErr.isEmpty()) qCWarning(lcDbus) << "systemctl stderr:" << stdErr;
+            if (exitCode != 0) {
+                qCWarning(lcDbus) << "systemctl exit code:" << exitCode;
+            } else {
+                m_autoStartEnabled = enabled;
+                qCInfo(lcDbus) << "AutoStart cache updated:" << m_autoStartEnabled;
+            }
+        });
 }
 
 void DbusInterface::onMessageReceived(const Message &msg)
