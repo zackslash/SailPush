@@ -55,6 +55,14 @@ DISTFILES += qml/sailpush.qml \
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
 # Translations — European languages
+# lupdate_only is read by lupdate but ignored by qmake/make, so QML sources
+# are scanned for qsTr() without affecting the build.
+lupdate_only {
+    SOURCES += qml/sailpush.qml \
+               qml/cover/CoverPage.qml \
+               qml/pages/*.qml \
+               qml/components/*.qml
+}
 TRANSLATIONS += \
     translations/sailpush_de.ts \
     translations/sailpush_fr.ts \
