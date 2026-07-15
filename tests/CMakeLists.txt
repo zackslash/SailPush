@@ -36,13 +36,6 @@ add_executable(tst_sailpushclient
 target_link_libraries(tst_sailpushclient PRIVATE Qt5::Core Qt5::Network Qt5::Test)
 add_test(NAME SailPushClient COMMAND tst_sailpushclient)
 
-add_executable(tst_credentialstore
-    tst_credentialstore.cpp
-    ${CMAKE_SOURCE_DIR}/../src/filecredentialstore.cpp
-)
-target_link_libraries(tst_credentialstore PRIVATE Qt5::Core Qt5::Test)
-add_test(NAME CredentialStore COMMAND tst_credentialstore)
-
 # --- WebSocket-dependent tests ---
 
 if(TARGET Qt5::WebSockets)

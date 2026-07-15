@@ -1,12 +1,13 @@
 [Unit]
 Description=SailPush Background Service
-Requires=dbus.service
+# Session bus is provided by user-session.target (no Requires=dbus.service — that would hit the system bus)
 After=pre-user-session.target
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/invoker --type=generic /usr/bin/sailpush --daemon
-Restart=on-failure
+# always: recover from clean Quit() during RPM upgrade even when no UI is running
+Restart=always
 RestartSec=5
 Environment=QT_LOGGING_RULES=com.zackslash.sailpush.*=true
 

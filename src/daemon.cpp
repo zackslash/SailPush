@@ -45,6 +45,7 @@ Daemon::Daemon(QObject *parent)
     , m_notificationManager(new NotificationManager(cachePath(), this))
     , m_networkMonitor(new NetworkMonitor(this))
     , m_cpuKeepalive(new CpuKeepalive(this))
+    , m_displayMonitor(new DisplayMonitor(this))
     , m_soundPlayer(new SoundPlayer(this))
     , m_pollingTimer(new QTimer(this))
     , m_wsDisconnectTimer(new QTimer(this))
@@ -53,6 +54,7 @@ Daemon::Daemon(QObject *parent)
     , m_pollingEnabled(true)
     , m_pollingIntervalMs(DEFAULT_POLLING_INTERVAL_MS)
     , m_syncInProgress(false)
+    , m_syncHoldsKeepalive(false)
     , m_preventDeepSleep(false)
     , m_systemNotifications(true)
 {
@@ -96,6 +98,9 @@ Daemon::Daemon(QObject *parent)
     connect(m_networkMonitor, &NetworkMonitor::networkAvailable, this, &Daemon::onNetworkAvailable);
     connect(m_networkMonitor, &NetworkMonitor::networkLost, this, &Daemon::onNetworkLost);
 
+    connect(m_displayMonitor, &DisplayMonitor::displayOff, this, &Daemon::onDisplayOff);
+    connect(m_displayMonitor, &DisplayMonitor::displayOn, this, &Daemon::onDisplayOn);
+
     connect(m_pollingTimer, &QTimer::timeout, this, &Daemon::onPollingTimeout);
     connect(m_wsDisconnectTimer, &QTimer::timeout, this, &Daemon::onWsDisconnectTimeout);
 
@@ -106,7 +111,6 @@ Daemon::Daemon(QObject *parent)
 Daemon::~Daemon()
 {
     stop();
-    // Zero sensitive credentials from memory
     for (auto *s : { &m_secret, &m_deviceId }) {
         if (!s->isEmpty()) {
             s->fill(QChar(0));
@@ -142,6 +146,8 @@ void Daemon::stop()
     m_pollingTimer->stop();
     m_wsDisconnectTimer->stop();
     m_wsManager->disconnectFromServer();
+    // CpuKeepalive is released best-effort by its destructor on process exit;
+    // MCE reaps the cookie when the D-Bus connection drops.
     m_dbus->unregisterService();
     m_store->save();
 }
@@ -175,8 +181,13 @@ void Daemon::performSync()
     qCInfo(lcDaemon) << "Performing message sync";
     m_syncInProgress = true;
     updateDiagnostics();
-    if (m_preventDeepSleep) {
+    // Hold a keepalive ref for the duration of this sync, tracked independently
+    // of m_preventDeepSleep so the matching stop() in onMessagesDownloaded/
+    // onMessagesDownloadFailed always releases it even if the flag is toggled
+    // mid-sync (otherwise the ref leaks and suspend is held forever).
+    if (m_preventDeepSleep && !m_syncHoldsKeepalive) {
         m_cpuKeepalive->start();
+        m_syncHoldsKeepalive = true;
     }
     m_client->downloadMessages(m_secret, m_deviceId);
 }
@@ -223,8 +234,9 @@ void Daemon::onMessagesDownloaded(const QList<Message> &messages)
 {
     m_syncInProgress = false;
     qCInfo(lcDaemon) << "Downloaded" << messages.size() << "messages";
-    if (m_preventDeepSleep) {
+    if (m_syncHoldsKeepalive) {
         m_cpuKeepalive->stop();
+        m_syncHoldsKeepalive = false;
     }
 
     QList<Message> newMessages;
@@ -260,8 +272,12 @@ void Daemon::onMessagesDownloaded(const QList<Message> &messages)
     }
 
     if (!m_wsManager->isConnected()) {
-        qCInfo(lcDaemon) << "Connecting WebSocket after sync";
-        m_wsManager->connectToServer(m_deviceId, m_secret);
+        if (shouldHoldWebSocket()) {
+            ensureWsConnected();
+        } else if (m_pollingEnabled) {
+            qCInfo(lcDaemon) << "Display off at sync; starting polling instead of WS";
+            m_pollingTimer->start(m_pollingIntervalMs);
+        }
     }
     m_startupSyncDone = true;
     updateDiagnostics();
@@ -271,28 +287,18 @@ void Daemon::onMessagesDownloadFailed(const QString &error)
 {
     m_syncInProgress = false;
     qCWarning(lcDaemon) << "Message download failed:" << error;
-    if (m_preventDeepSleep) {
+    if (m_syncHoldsKeepalive) {
         m_cpuKeepalive->stop();
+        m_syncHoldsKeepalive = false;
     }
 
     // Detect invalid credentials (Pushover returns 401/403 for bad secret/device)
     if (error.contains("credentials rejected", Qt::CaseInsensitive)) {
-        m_credentialError = tr("Credentials rejected by server. Please re-login.");
-        qCWarning(lcDaemon) << m_credentialError;
-        // Clear stored credentials so UI shows login page
-        m_credentials->clear();
-        m_credentialsLoaded = false;
-        m_secret.clear();
-        m_deviceId.clear();
-        m_wsManager->disconnectFromServer();
-        m_dbus->notifyCredentialsInvalidated(m_credentialError);
+        invalidateCredentials(tr("Credentials rejected by server. Please re-login."));
     }
 
     // WebSocket connection is independent of message download — try connecting anyway
-    if (m_credentialsLoaded && !m_wsManager->isConnected()) {
-        qCInfo(lcDaemon) << "Connecting WebSocket despite download failure";
-        m_wsManager->connectToServer(m_deviceId, m_secret);
-    }
+    ensureWsConnected();
     updateDiagnostics();
 }
 
@@ -345,15 +351,7 @@ void Daemon::onWsError(const QString &error)
 {
     qCWarning(lcDaemon) << "WebSocket error:" << error;
     if (error.contains("Permanent", Qt::CaseInsensitive) || error.contains("re-login", Qt::CaseInsensitive)) {
-        m_credentialError = tr("Session expired. Please re-login.");
-        qCWarning(lcDaemon) << m_credentialError;
-        // Clear stored credentials so UI shows login page
-        m_credentials->clear();
-        m_credentialsLoaded = false;
-        m_secret.clear();
-        m_deviceId.clear();
-        m_wsManager->disconnectFromServer();
-        m_dbus->notifyCredentialsInvalidated(m_credentialError);
+        invalidateCredentials(tr("Session expired. Please re-login."));
     }
     updateDiagnostics();
 }
@@ -372,12 +370,9 @@ void Daemon::onWsReloadRequested()
 void Daemon::onNetworkAvailable()
 {
     qCInfo(lcDaemon) << "Network available";
-    if (m_credentialsLoaded && !m_wsManager->isConnected()) {
-        qCInfo(lcDaemon) << "Reconnecting WebSocket";
-        m_wsManager->connectToServer(m_deviceId, m_secret);
-        if (m_pollingEnabled) {
-            m_pollingTimer->start(m_pollingIntervalMs);
-        }
+    ensureWsConnected();
+    if (m_pollingEnabled && m_credentialsLoaded) {
+        m_pollingTimer->start(m_pollingIntervalMs);
     }
 }
 
@@ -402,6 +397,51 @@ void Daemon::onWsDisconnectTimeout()
         qCInfo(lcDaemon) << "WebSocket disconnected for 30s, starting polling fallback";
         m_pollingTimer->start(m_pollingIntervalMs);
     }
+}
+
+void Daemon::onDisplayOff()
+{
+    // TODO: a plain QTimer does not wake the device from deep sleep, so the
+    // polling path below only fires while the device is awake. True deep-sleep
+    // polling needs libiphb / Nemo.KeepAlive.BackgroundJob (SFOS-only; not
+    // implemented here — see README "Limitations").
+    if (!m_credentialsLoaded) {
+        return;
+    }
+
+    if (m_preventDeepSleep) {
+        qCInfo(lcDaemon) << "Display off: holding CPU keepalive for real-time WS";
+        m_cpuKeepalive->start();
+    } else {
+        qCInfo(lcDaemon) << "Display off: dropping WS, switching to polling";
+        m_wsDisconnectTimer->stop();
+        m_wsManager->disconnectFromServer();
+        if (m_pollingEnabled) {
+            m_pollingTimer->start(m_pollingIntervalMs);
+        }
+    }
+    updateDiagnostics();
+}
+
+void Daemon::onDisplayOn()
+{
+    if (!m_credentialsLoaded) {
+        return;
+    }
+
+    if (m_preventDeepSleep) {
+        qCInfo(lcDaemon) << "Display on: releasing display-off CPU keepalive";
+        m_cpuKeepalive->stop();
+    }
+
+    // Reconnect the WebSocket for instant delivery. Gated on network to avoid
+    // a connect/teardown loop while offline; onNetworkAvailable handles it.
+    if (m_networkMonitor->isOnline() && !m_wsManager->isConnected()) {
+        qCInfo(lcDaemon) << "Display on: reconnecting WebSocket";
+        m_pollingTimer->stop();
+        m_wsManager->connectToServer(m_deviceId, m_secret);
+    }
+    updateDiagnostics();
 }
 
 void Daemon::onDbusRequestSync()
@@ -430,15 +470,7 @@ void Daemon::onDbusRequestReloadSettings()
     qCInfo(lcDaemon) << "D-Bus: reloading settings";
     loadSettings();
 
-    // Apply updated polling settings immediately
-    if (m_pollingEnabled && m_pollingTimer->isActive()) {
-        m_pollingTimer->setInterval(m_pollingIntervalMs);
-        qCInfo(lcDaemon) << "Polling timer interval updated to" << m_pollingIntervalMs;
-    }
-    if (!m_pollingEnabled && m_pollingTimer->isActive()) {
-        m_pollingTimer->stop();
-        qCInfo(lcDaemon) << "Polling disabled, timer stopped";
-    }
+    applyPollingSettings();
 }
 
 void Daemon::onDbusRequestUpdateSettings(const QVariantMap &settings)
@@ -452,7 +484,22 @@ void Daemon::onDbusRequestUpdateSettings(const QVariantMap &settings)
         m_pollingIntervalMs = pollingIntervalFromIndex(settings.value("pollingIntervalIndex").toInt());
     }
     if (settings.contains("preventDeepSleep")) {
+        bool wasPreventDeepSleep = m_preventDeepSleep;
         m_preventDeepSleep = settings.value("preventDeepSleep").toBool();
+        // Reconcile the display-off keepalive if the toggle changed while the
+        // screen is already off (otherwise the ref leaks / never starts).
+        if (m_credentialsLoaded && !m_displayMonitor->isDisplayOn()) {
+            if (m_preventDeepSleep && !wasPreventDeepSleep) {
+                m_cpuKeepalive->start();
+            } else if (!m_preventDeepSleep && wasPreventDeepSleep) {
+                m_cpuKeepalive->stop();
+                m_wsDisconnectTimer->stop();
+                m_wsManager->disconnectFromServer();
+                if (m_pollingEnabled) {
+                    m_pollingTimer->start(m_pollingIntervalMs);
+                }
+            }
+        }
     }
     if (settings.contains("systemNotifications")) {
         m_systemNotifications = settings.value("systemNotifications").toBool();
@@ -463,13 +510,7 @@ void Daemon::onDbusRequestUpdateSettings(const QVariantMap &settings)
                      << "preventDeepSleep=" << m_preventDeepSleep
                      << "systemNotifications=" << m_systemNotifications;
 
-    // Apply updated polling settings immediately
-    if (m_pollingEnabled && m_pollingTimer->isActive()) {
-        m_pollingTimer->setInterval(m_pollingIntervalMs);
-    }
-    if (!m_pollingEnabled && m_pollingTimer->isActive()) {
-        m_pollingTimer->stop();
-    }
+    applyPollingSettings();
 }
 
 void Daemon::onDbusRequestAcknowledge(const QString &receipt)
@@ -560,4 +601,51 @@ void Daemon::updateDiagnostics()
         diag["credentialError"] = m_credentialError;
     }
     m_dbus->setExtraDiagnostics(diag);
+}
+
+void Daemon::invalidateCredentials(const QString &reason)
+{
+    m_credentialError = reason;
+    qCWarning(lcDaemon) << m_credentialError;
+    m_credentials->clear();
+    m_credentialsLoaded = false;
+    m_secret.clear();
+    m_deviceId.clear();
+    m_wsManager->resetCredentials();
+    m_wsManager->disconnectFromServer();
+    // Release the display-off keepalive hold if active — we're tearing down
+    // everything it was protecting (creds gone, WS dropped).
+    if (m_preventDeepSleep && !m_displayMonitor->isDisplayOn()) {
+        m_cpuKeepalive->stop();
+    }
+    m_pollingTimer->stop();
+    m_dbus->notifyCredentialsInvalidated(m_credentialError);
+}
+
+bool Daemon::shouldHoldWebSocket() const
+{
+    // WebSocket stays up with the screen off only when the user opted into keepalive-while-off.
+    return m_displayMonitor->isDisplayOn() || m_preventDeepSleep;
+}
+
+void Daemon::ensureWsConnected()
+{
+    if (m_credentialsLoaded && !m_wsManager->isConnected() && shouldHoldWebSocket()) {
+        qCInfo(lcDaemon) << "Connecting WebSocket";
+        m_wsManager->connectToServer(m_deviceId, m_secret);
+    }
+}
+
+void Daemon::applyPollingSettings()
+{
+    if (!m_pollingTimer->isActive()) {
+        return;
+    }
+    if (m_pollingEnabled) {
+        m_pollingTimer->setInterval(m_pollingIntervalMs);
+        qCInfo(lcDaemon) << "Polling timer interval updated to" << m_pollingIntervalMs;
+    } else {
+        m_pollingTimer->stop();
+        qCInfo(lcDaemon) << "Polling disabled, timer stopped";
+    }
 }

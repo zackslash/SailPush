@@ -13,6 +13,7 @@
 #include "notificationmanager.h"
 #include "networkmonitor.h"
 #include "cpukeepalive.h"
+#include "displaymonitor.h"
 #include "soundplayer.h"
 
 class Daemon : public QObject {
@@ -53,6 +54,8 @@ private slots:
     void onDbusRequestOpenMessage(const QString &messageId);
     void onPollingTimeout();
     void onWsDisconnectTimeout();
+    void onDisplayOff();
+    void onDisplayOn();
     void onNotificationAction(const QString &messageId, const QString &action, const QString &receipt);
 
 private:
@@ -61,6 +64,10 @@ private:
     void deleteMessagesUpTo(const QString &highestId);
     void publishNotificationForMessage(const Message &msg, bool isNew);
     bool isUiRunning();
+    void invalidateCredentials(const QString &reason);
+    bool shouldHoldWebSocket() const;
+    void ensureWsConnected();
+    void applyPollingSettings();
     void updateDiagnostics();
 
     SailPushClient *m_client;
@@ -71,6 +78,7 @@ private:
     NotificationManager *m_notificationManager;
     NetworkMonitor *m_networkMonitor;
     CpuKeepalive *m_cpuKeepalive;
+    DisplayMonitor *m_displayMonitor;
     SoundPlayer *m_soundPlayer;
 
     QTimer *m_pollingTimer;
@@ -84,6 +92,7 @@ private:
     bool m_pollingEnabled;
     int m_pollingIntervalMs;
     bool m_syncInProgress;
+    bool m_syncHoldsKeepalive;
     bool m_preventDeepSleep;
     bool m_systemNotifications;
     QString m_credentialError;

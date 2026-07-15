@@ -22,6 +22,8 @@ private slots:
     void testContainsMessage();
     void testTrimMessages();
     void testSaveAndLoad();
+    void testSaveIsAtomic();
+    void testRecoversFromStaleTemp();
 
 private:
     QTemporaryDir m_tempDir;
@@ -195,6 +197,65 @@ void TestMessageStore::testSaveAndLoad()
     QCOMPARE(store2->messages().first().title, QString("Saved Title"));
 
     delete store2;
+}
+
+void TestMessageStore::testSaveIsAtomic()
+{
+    Message msg;
+    msg.id = "atomic1";
+    msg.message = "Atomic test";
+    msg.app = "TestApp";
+
+    m_store->addMessage(msg);
+    QVERIFY(m_store->save());
+
+    QString path = m_tempDir.path() + "/messages.json";
+    QString tmpPath = path + ".tmp";
+
+    QVERIFY(QFile::exists(path));
+    QVERIFY(!QFile::exists(tmpPath));
+
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    QByteArray data = file.readAll();
+    file.close();
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+    QCOMPARE(parseError.error, QJsonParseError::NoError);
+    QVERIFY(doc.isArray());
+}
+
+void TestMessageStore::testRecoversFromStaleTemp()
+{
+    QString path = m_tempDir.path() + "/messages.json";
+    QString tmpPath = path + ".tmp";
+
+    // Create a bogus stale temp file as if a prior crash left one behind
+    QFile staleFile(tmpPath);
+    QVERIFY(staleFile.open(QIODevice::WriteOnly));
+    staleFile.write("this is garbage not json {{{");
+    staleFile.close();
+
+    Message msg;
+    msg.id = "recover1";
+    msg.message = "Recovery test";
+    msg.app = "TestApp";
+    m_store->addMessage(msg);
+
+    QVERIFY(m_store->save());
+
+    QVERIFY(!QFile::exists(tmpPath));
+
+    QFile resultFile(path);
+    QVERIFY(resultFile.open(QIODevice::ReadOnly));
+    QByteArray data = resultFile.readAll();
+    resultFile.close();
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+    QCOMPARE(parseError.error, QJsonParseError::NoError);
+    QVERIFY(doc.isArray());
+    QCOMPARE(doc.array().size(), 1);
+    QCOMPARE(doc.array().first().toObject()["id"].toString(), QString("recover1"));
 }
 
 QTEST_MAIN(TestMessageStore)

@@ -59,7 +59,6 @@ Page {
                 text: qsTr("Status: %1").arg(rootDaemon.connectionState)
                 color: {
                     if (rootDaemon.connectionState === "ready" || rootDaemon.connectionState === "connected") return Theme.highlightColor
-                    if (rootDaemon.connectionState === "error") return "#CC0000"
                     return Theme.secondaryColor
                 }
             }
@@ -115,13 +114,13 @@ Page {
             }
 
             SectionHeader {
-                text: qsTr("Deep Sleep")
+                text: qsTr("Power")
             }
 
             TextSwitch {
                 x: Theme.horizontalPageMargin
                 width: page.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("Prevent Deep Sleep During Sync")
+                text: qsTr("Keep Connection Alive When Screen Off")
                 checked: page.preventDeepSleep
                 onCheckedChanged: {
                     page.preventDeepSleep = checked
@@ -133,16 +132,7 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: page.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.")
-                color: Theme.secondaryColor
-                wrapMode: Text.WordWrap
-                font.pixelSize: Theme.fontSizeSmall
-            }
-
-            Label {
-                x: Theme.horizontalPageMargin
-                width: page.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("Note: For persistent WebSocket in deep sleep, run:\nmcetool --set-suspend-policy=early")
+                text: qsTr("Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.")
                 color: Theme.secondaryColor
                 wrapMode: Text.WordWrap
                 font.pixelSize: Theme.fontSizeSmall
@@ -169,7 +159,6 @@ Page {
             }
 
             TextSwitch {
-                id: autoStartSwitch
                 x: Theme.horizontalPageMargin
                 width: page.width - 2 * Theme.horizontalPageMargin
                 text: qsTr("Start on boot")

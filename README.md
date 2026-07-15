@@ -6,15 +6,14 @@
 
 Unofficial Pushover client for SailfishOS. Real-time notifications via WebSocket, background daemon with systemd integration.
 
-## Deep Sleep
+## Background Delivery & Battery
 
-SailfishOS has no system-level push service. WebSocket connections break in deep sleep. For reliable notifications:
+- **Screen on:** persistent WebSocket for instant delivery.
+- **Screen off:** polls Pushover on the configured interval (1–30 min, default 5). Messages are queued server-side, so nothing is lost.
 
-```bash
-mcetool --set-suspend-policy=early
-```
+Want real-time delivery while the screen is off? Enable **Keep Connection Alive When Screen Off** in Settings — it uses a per-app keepalive (higher battery use, but scoped to SailPush rather than the whole device).
 
-This keeps the CPU and network alive when the screen is off. Without it, notifications arrive when the device wakes up (delayed up to the polling interval).
+> Note: while the screen is off, polling only fires while the device is awake; wake-from-deep-sleep polling is not yet supported. After a daemon restart, open the app to catch any messages that didn't notify.
 
 ## Install
 
@@ -35,6 +34,13 @@ Requires Sailfish OS SDK.
 ```bash
 qmake5 && make        # local build
 mb2 build             # RPM build
+```
+
+The unit tests under `tests/` build and run on a regular Linux box with Qt5
+(no Sailfish SDK needed for the pure-Qt suites):
+
+```bash
+cmake -S tests -B tests/build && cmake --build tests/build && ctest --test-dir tests/build
 ```
 
 ## Architecture

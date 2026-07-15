@@ -9,6 +9,7 @@ ApplicationWindow {
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
 
     property bool hasCredentials: loginHelper ? loginHelper.hasCredentials : false
+    property bool credentialsLoading: loginHelper ? loginHelper.credentialsLoading : false
     property string pendingMessageId: ""
     property string lastNavigatedMessageId: ""
 
@@ -35,7 +36,9 @@ ApplicationWindow {
     }
 
     onHasCredentialsChanged: {
-        if (hasCredentials && pageStack.currentPage != null) {
+        // Skip during initial async credential load — the initial page is
+        // pushed by onCredentialsLoadingChanged once the load finishes.
+        if (hasCredentials && !credentialsLoading && pageStack.currentPage != null) {
             daemonConnector.reloadCredentials()
             pageStack.replace(Qt.resolvedUrl("pages/MainPage.qml"), {rootDaemon: daemonConnector})
         }
@@ -70,6 +73,21 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        // If credentials are still loading asynchronously, defer the initial
+        // page push until onCredentialsLoadingChanged fires. This avoids a
+        // LoginPage → MainPage flicker when stored credentials are found.
+        if (!credentialsLoading) {
+            pushInitialPage()
+        }
+    }
+
+    onCredentialsLoadingChanged: {
+        if (!credentialsLoading) {
+            pushInitialPage()
+        }
+    }
+
+    function pushInitialPage() {
         if (hasCredentials) {
             pageStack.push(Qt.resolvedUrl("pages/MainPage.qml"), {rootDaemon: daemonConnector})
             checkPendingOpenMessage()
@@ -149,7 +167,6 @@ ApplicationWindow {
         }
     }
 
-    // When messages are refreshed (e.g., after daemon sync), check for pending message
     Connections {
         target: daemonConnector
         onMessagesChanged: {
@@ -160,11 +177,6 @@ ApplicationWindow {
                 }
             }
         }
-    }
-
-    function navigateToMainPage() {
-        pageStack.clear()
-        pageStack.push(Qt.resolvedUrl("pages/MainPage.qml"), {rootDaemon: daemonConnector})
     }
 
     function navigateToLoginPage() {

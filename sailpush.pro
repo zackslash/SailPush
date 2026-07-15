@@ -1,7 +1,7 @@
 TARGET = sailpush
 
 CONFIG += sailfishapp
-QT += core gui quick qml network websockets dbus multimedia
+QT += core gui quick qml network websockets dbus multimedia concurrent
 PKGCONFIG += sailfishsecrets
 
 # Auto-detect version from git. CI builds (tarball, no .git) use sed-replaced
@@ -20,6 +20,7 @@ SOURCES += src/main.cpp \
            src/notificationmanager.cpp \
            src/networkmonitor.cpp \
            src/cpukeepalive.cpp \
+           src/displaymonitor.cpp \
            src/loginhelper.cpp \
            src/soundplayer.cpp
 
@@ -31,11 +32,12 @@ HEADERS += src/message.h \
            src/messagestore.h \
            src/dbusinterface.h \
            src/notificationmanager.h \
-           src/networkmonitor.h \
-           src/cpukeepalive.h \
-           src/loginhelper.h \
-           src/soundplayer.h \
-           src/daemon.h
+            src/networkmonitor.h \
+            src/cpukeepalive.h \
+            src/displaymonitor.h \
+            src/loginhelper.h \
+            src/soundplayer.h \
+            src/daemon.h
 
 DISTFILES += qml/sailpush.qml \
     qml/cover/CoverPage.qml \
@@ -53,6 +55,14 @@ DISTFILES += qml/sailpush.qml \
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
 # Translations — European languages
+# lupdate_only is read by lupdate but ignored by qmake/make, so QML sources
+# are scanned for qsTr() without affecting the build.
+lupdate_only {
+    SOURCES += qml/sailpush.qml \
+               qml/cover/CoverPage.qml \
+               qml/pages/*.qml \
+               qml/components/*.qml
+}
 TRANSLATIONS += \
     translations/sailpush_de.ts \
     translations/sailpush_fr.ts \

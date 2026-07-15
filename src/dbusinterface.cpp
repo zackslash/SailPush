@@ -311,8 +311,6 @@ QString DbusInterface::wsStateToString(WebSocketManager::ConnectionState state) 
     case WebSocketManager::ConnectionState::Connecting:    return "connecting";
     case WebSocketManager::ConnectionState::Connected:     return "connected";
     case WebSocketManager::ConnectionState::LoginSent:     return "ready";
-    case WebSocketManager::ConnectionState::Error:         return "error";
-    case WebSocketManager::ConnectionState::SessionClosed: return "session_closed";
     default: return "unknown";
     }
 }

@@ -14,9 +14,13 @@ debug/
 release/
 tests/build/
 tests/Testing/
+build-test/
 
 # Compiled translations
 *.qm
+
+# Deepwork session state
+.slim/deepwork/
 
 # IDE
 .idea/

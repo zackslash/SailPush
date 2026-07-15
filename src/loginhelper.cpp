@@ -2,39 +2,87 @@
 #include "credentialstore.h"
 #include "daemon.h"
 #include <QLoggingCategory>
+#include <QtConcurrent>
+#include <QFutureWatcher>
 
 Q_LOGGING_CATEGORY(lcLoginHelper, "com.zackslash.sailpush.login")
 
-static QString generateDeviceName()
+namespace {
+struct LoadResult {
+    bool hasCreds = false;
+    ICredentialStore::LoadError error = ICredentialStore::LoadError::None;
+};
+
+QString generateDeviceName()
 {
     return QStringLiteral("SailfishOS");
 }
+} // namespace
 
 LoginHelper::LoginHelper(QObject *parent)
     : QObject(parent)
     , m_client(new SailPushClient(this))
-    , m_store(new CredentialStore(Daemon::dataPath(), this))
     , m_loggingIn(false)
     , m_registering(false)
     , m_needsTwoFactor(false)
+    , m_hasCredentials(false)
+    , m_credentialsLoading(true)
 {
-    QString secret, deviceId;
-    if (!m_store->load(secret, deviceId)) {
-        ICredentialStore::LoadError err = m_store->lastError();
-        if (err == ICredentialStore::LoadError::InvalidFormat) {
-            m_migrationReason = tr("App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.");
-        } else if (err == ICredentialStore::LoadError::DecryptionFailed) {
-            m_migrationReason = tr("Saved credentials could not be decrypted. This can happen after a system update. Please log in again.");
-        } else if (err == ICredentialStore::LoadError::BackendUnavailable) {
-            m_migrationReason = tr("Secrets service is not available. Please restart the device and try again.");
-        }
-    }
-
     connect(m_client, &SailPushClient::loginSuccess, this, &LoginHelper::onLoginSuccess);
     connect(m_client, &SailPushClient::loginFailed, this, &LoginHelper::onLoginFailed);
     connect(m_client, &SailPushClient::twoFactorRequired, this, &LoginHelper::onTwoFactorRequired);
     connect(m_client, &SailPushClient::deviceRegistered, this, &LoginHelper::onDeviceRegistered);
     connect(m_client, &SailPushClient::deviceRegistrationFailed, this, &LoginHelper::onDeviceRegistrationFailed);
+
+    loadCredentialsAsync();
+}
+
+void LoginHelper::loadCredentialsAsync()
+{
+    qCInfo(lcLoginHelper) << "Loading credentials asynchronously";
+    const QString dataPath = Daemon::dataPath();
+
+    auto *watcher = new QFutureWatcher<LoadResult>(this);
+    connect(watcher, &QFutureWatcher<LoadResult>::finished, this, [this, watcher]() {
+        const LoadResult result = watcher->result();
+        watcher->deleteLater();
+
+        m_hasCredentials = result.hasCreds;
+
+        if (!result.hasCreds) {
+            const auto err = result.error;
+            if (err == ICredentialStore::LoadError::InvalidFormat) {
+                m_migrationReason = tr("App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.");
+            } else if (err == ICredentialStore::LoadError::DecryptionFailed) {
+                m_migrationReason = tr("Saved credentials could not be decrypted. This can happen after a system update. Please log in again.");
+            } else if (err == ICredentialStore::LoadError::BackendUnavailable) {
+                m_migrationReason = tr("Secrets service is not available. Please restart the device and try again.");
+            }
+            if (!m_migrationReason.isEmpty()) {
+                emit migrationReasonChanged();
+            }
+        }
+
+        // Emit credentialsChanged BEFORE flipping credentialsLoading so QML's
+        // onHasCredentialsChanged guard (!credentialsLoading) skips the page
+        // replace; the actual initial page push happens in
+        // onCredentialsLoadingChanged → pushInitialPage().
+        emit credentialsChanged();
+        setCredentialsLoading(false);
+    });
+
+    watcher->setFuture(QtConcurrent::run([dataPath]() {
+        LoadResult r;
+        // CredentialStore is created and destroyed entirely on this worker
+        // thread. waitForFinished() spins its own local QEventLoop (via
+        // QDBusPendingCall) so no pre-existing event loop is needed. The UI
+        // thread stays responsive throughout.
+        CredentialStore store(dataPath);
+        QString secret, deviceId;
+        r.hasCreds = store.load(secret, deviceId);
+        r.error = store.lastError();
+        return r;
+    }));
 }
 
 void LoginHelper::login(const QString &email, const QString &password, const QString &twofa)
@@ -60,8 +108,15 @@ void LoginHelper::cancel()
 void LoginHelper::logout()
 {
     qCInfo(lcLoginHelper) << "Logging out, clearing credentials";
-    m_store->clear();
-    emit credentialsChanged();
+    // Optimistic UI update — flip immediately so the user sees feedback.
+    setHasCredentials(false);
+
+    // Fire-and-forget the blocking clear() on a worker thread.
+    const QString dataPath = Daemon::dataPath();
+    QtConcurrent::run([dataPath]() {
+        CredentialStore store(dataPath);
+        store.clear();
+    });
 }
 
 void LoginHelper::setMigrationReason(const QString &reason)
@@ -89,7 +144,6 @@ void LoginHelper::onLoginFailed(const QString &error)
     setLoggingIn(false);
     setErrorString(error);
     emit loginFailed(error);
-
 }
 
 void LoginHelper::onTwoFactorRequired()
@@ -104,21 +158,34 @@ void LoginHelper::onDeviceRegistered(const QString &deviceId)
     qCInfo(lcLoginHelper) << "Device registered:" << deviceId;
     setRegistering(false);
 
-    bool saved = m_store->save(m_pendingSecret, deviceId);
-    if (saved) {
-        qCInfo(lcLoginHelper) << "Credentials saved successfully";
-        if (!m_migrationReason.isEmpty()) {
-            m_migrationReason.clear();
-            emit migrationReasonChanged();
-        }
-        emit credentialsChanged();
-        emit credentialsSaved();
-    } else {
-        setErrorString(tr("Failed to save credentials"));
-        emit loginFailed(tr("Failed to save credentials"));
-    }
-
+    // Save credentials on a worker thread to avoid blocking the UI.
+    const QString secret = m_pendingSecret;
     m_pendingSecret.clear();
+    const QString dataPath = Daemon::dataPath();
+
+    auto *watcher = new QFutureWatcher<bool>(this);
+    connect(watcher, &QFutureWatcher<bool>::finished, this, [this, watcher]() {
+        const bool saved = watcher->result();
+        watcher->deleteLater();
+
+        if (saved) {
+            qCInfo(lcLoginHelper) << "Credentials saved successfully";
+            if (!m_migrationReason.isEmpty()) {
+                m_migrationReason.clear();
+                emit migrationReasonChanged();
+            }
+            setHasCredentials(true);
+            emit credentialsSaved();
+        } else {
+            setErrorString(tr("Failed to save credentials"));
+            emit loginFailed(tr("Failed to save credentials"));
+        }
+    });
+
+    watcher->setFuture(QtConcurrent::run([dataPath, secret, deviceId]() {
+        CredentialStore store(dataPath);
+        return store.save(secret, deviceId);
+    }));
 }
 
 void LoginHelper::onDeviceRegistrationFailed(const QString &error)
@@ -160,5 +227,21 @@ void LoginHelper::setErrorString(const QString &value)
     if (m_errorString != value) {
         m_errorString = value;
         emit errorStringChanged();
+    }
+}
+
+void LoginHelper::setHasCredentials(bool value)
+{
+    if (m_hasCredentials != value) {
+        m_hasCredentials = value;
+        emit credentialsChanged();
+    }
+}
+
+void LoginHelper::setCredentialsLoading(bool value)
+{
+    if (m_credentialsLoading != value) {
+        m_credentialsLoading = value;
+        emit credentialsLoadingChanged();
     }
 }
