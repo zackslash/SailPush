@@ -12,6 +12,7 @@ class LoginHelper : public QObject {
     Q_PROPERTY(bool registering READ registering NOTIFY registeringChanged)
     Q_PROPERTY(bool needsTwoFactor READ needsTwoFactor NOTIFY needsTwoFactorChanged)
     Q_PROPERTY(bool hasCredentials READ hasCredentials NOTIFY credentialsChanged)
+    Q_PROPERTY(bool credentialsLoading READ credentialsLoading NOTIFY credentialsLoadingChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
     Q_PROPERTY(QString migrationReason READ migrationReason NOTIFY migrationReasonChanged)
 
@@ -21,7 +22,8 @@ public:
     bool loggingIn() const { return m_loggingIn; }
     bool registering() const { return m_registering; }
     bool needsTwoFactor() const { return m_needsTwoFactor; }
-    bool hasCredentials() const { return m_store->hasCredentials(); }
+    bool hasCredentials() const { return m_hasCredentials; }
+    bool credentialsLoading() const { return m_credentialsLoading; }
     QString errorString() const { return m_errorString; }
     QString migrationReason() const { return m_migrationReason; }
 
@@ -35,6 +37,7 @@ signals:
     void registeringChanged();
     void needsTwoFactorChanged();
     void credentialsChanged();
+    void credentialsLoadingChanged();
     void errorStringChanged();
     void migrationReasonChanged();
     void loginFailed(const QString &error);
@@ -52,13 +55,17 @@ private:
     void setRegistering(bool value);
     void setNeedsTwoFactor(bool value);
     void setErrorString(const QString &value);
+    void setHasCredentials(bool value);
+    void setCredentialsLoading(bool value);
+    void loadCredentialsAsync();
 
     SailPushClient *m_client;
-    ICredentialStore *m_store;
 
     bool m_loggingIn;
     bool m_registering;
     bool m_needsTwoFactor;
+    bool m_hasCredentials;
+    bool m_credentialsLoading;
     QString m_errorString;
     QString m_migrationReason;
     QString m_pendingSecret;

@@ -6,6 +6,8 @@
 #include <QJsonParseError>
 #include <QLoggingCategory>
 #include <QFileInfo>
+#include <cstdio>
+#include <unistd.h>
 
 Q_LOGGING_CATEGORY(lcMessageStore, "com.zackslash.sailpush.store")
 
@@ -57,6 +59,7 @@ bool MessageStore::load()
 bool MessageStore::save() const
 {
     QString path = storagePath();
+    QString tmpPath = path + QStringLiteral(".tmp");
     QDir dir = QFileInfo(path).dir();
     if (!dir.exists()) {
         if (!dir.mkpath(".")) {
@@ -65,20 +68,38 @@ bool MessageStore::save() const
         }
     }
 
+    // Clean up any .tmp left by a prior crash
+    QFile stale(tmpPath);
+    if (stale.exists()) {
+        qCWarning(lcMessageStore) << "Removing stale temp file:" << tmpPath;
+        stale.remove();
+    }
+
     QJsonArray array;
     for (const Message &msg : m_messages) {
         array.append(msg.toJson());
     }
 
     QJsonDocument doc(array);
-    QFile file(path);
+    QFile file(tmpPath);
     if (!file.open(QIODevice::WriteOnly)) {
-        qCWarning(lcMessageStore) << "Failed to save message store:" << file.errorString();
+        qCWarning(lcMessageStore) << "Failed to open temp file for writing:" << file.errorString();
         return false;
     }
 
     file.write(doc.toJson(QJsonDocument::Compact));
+    file.flush();
+    if (file.handle() >= 0) ::fsync(file.handle());
     file.close();
+
+    // Atomically replace the target with the temp file using POSIX rename(2),
+    // which is atomic on the same filesystem. QFile::rename() cannot overwrite
+    // an existing file; POSIX rename() does.
+    if (std::rename(tmpPath.toUtf8().constData(), path.toUtf8().constData()) != 0) {
+        qCWarning(lcMessageStore) << "Failed to rename temp file to target:" << tmpPath << "->" << path;
+        QFile::remove(tmpPath);
+        return false;
+    }
 
     qCInfo(lcMessageStore) << "Saved" << m_messages.size() << "messages to store";
     return true;

@@ -7,11 +7,13 @@ WebSocketManager::WebSocketManager(QObject *parent)
     : QObject(parent)
     , m_webSocket(new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this))
     , m_reconnectTimer(new QTimer(this))
+    , m_idleTimer(new QTimer(this))
     , m_state(ConnectionState::Disconnected)
     , m_reconnectDelay(RECONNECT_INITIAL_MS)
     , m_autoReconnect(true)
 {
     m_reconnectTimer->setSingleShot(true);
+    m_idleTimer->setSingleShot(true);
 
     connect(m_webSocket, &QWebSocket::connected, this, &WebSocketManager::onConnected);
     connect(m_webSocket, &QWebSocket::disconnected, this, &WebSocketManager::onDisconnected);
@@ -20,6 +22,13 @@ WebSocketManager::WebSocketManager(QObject *parent)
     connect(m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
             this, &WebSocketManager::onError);
     connect(m_reconnectTimer, &QTimer::timeout, this, &WebSocketManager::onReconnectTimer);
+    connect(m_idleTimer, &QTimer::timeout, this, &WebSocketManager::onIdleTimeout);
+}
+
+void WebSocketManager::armIdleWatchdog()
+{
+    // OS TCP keepalive (~2h) is too slow to catch half-open connections during suspend; this fires in 90s.
+    m_idleTimer->start(IDLE_TIMEOUT_MS);
 }
 
 void WebSocketManager::connectToServer(const QString &deviceId, const QString &secret)
@@ -36,19 +45,32 @@ void WebSocketManager::connectToServer(const QString &deviceId, const QString &s
 
     qCInfo(lcWebSocket) << "Connecting to" << WS_URL;
     m_reconnectTimer->stop();
+    m_idleTimer->stop();
     m_webSocket->close();
     setState(ConnectionState::Connecting);
     m_webSocket->open(QUrl(WS_URL));
+    // Note: QWebSocket (Qt 5.15) does not expose setSocketOption(); TCP-level
+    // keepalive cannot be enabled here. The 90s app-level idle watchdog covers
+    // half-open detection (OS TCP keepalive defaults to ~2h otherwise).
+    armIdleWatchdog();
 }
 
 void WebSocketManager::disconnectFromServer()
 {
     m_autoReconnect = false;
     m_reconnectTimer->stop();
+    m_idleTimer->stop();
     m_webSocket->close();
+    // See header — creds intentionally preserved for reconnect().
+    setState(ConnectionState::Disconnected);
+}
+
+void WebSocketManager::resetCredentials()
+{
     m_secret.clear();
     m_deviceId.clear();
-    setState(ConnectionState::Disconnected);
+    m_reconnectTimer->stop();
+    m_idleTimer->stop();
 }
 
 void WebSocketManager::reconnect()
@@ -62,6 +84,7 @@ void WebSocketManager::onConnected()
     qCInfo(lcWebSocket) << "WebSocket connected";
     m_reconnectTimer->stop();
     setState(ConnectionState::Connected);
+    armIdleWatchdog();
     sendLoginFrame();
 }
 
@@ -77,12 +100,14 @@ void WebSocketManager::onDisconnected()
 
 void WebSocketManager::onTextMessageReceived(const QString &message)
 {
+    armIdleWatchdog();
     FrameType frame = static_cast<FrameType>(parseFrame(message.toUtf8()));
     handleFrame(frame);
 }
 
 void WebSocketManager::onBinaryMessageReceived(const QByteArray &message)
 {
+    armIdleWatchdog();
     FrameType frame = static_cast<FrameType>(parseFrame(message));
     handleFrame(frame);
 }
@@ -120,7 +145,13 @@ void WebSocketManager::onError(QAbstractSocket::SocketError error)
 {
     Q_UNUSED(error);
     qCWarning(lcWebSocket) << "WebSocket error:" << m_webSocket->errorString();
-    setState(ConnectionState::Error);
+    m_idleTimer->stop();
+    // Transient errors -> Disconnected so the reconnect FSM can progress (onReconnectTimer early-returns otherwise).
+    // Qt emits disconnected after error, so guard against double-arming the timer.
+    setState(ConnectionState::Disconnected);
+    if (m_autoReconnect && !m_reconnectTimer->isActive()) {
+        scheduleReconnect();
+    }
 }
 
 void WebSocketManager::onReconnectTimer()
@@ -132,6 +163,17 @@ void WebSocketManager::onReconnectTimer()
     m_webSocket->close();
     m_webSocket->open(QUrl(WS_URL));
     setState(ConnectionState::Connecting);
+    armIdleWatchdog();
+}
+
+void WebSocketManager::onIdleTimeout()
+{
+    qCWarning(lcWebSocket) << "No data received for" << IDLE_TIMEOUT_MS
+                           << "ms, treating connection as dead";
+    m_idleTimer->stop();
+    // Closing the socket drives the normal disconnected -> scheduleReconnect
+    // path, recovering from silently half-open connections during suspend.
+    m_webSocket->close();
 }
 
 void WebSocketManager::sendLoginFrame()
@@ -140,11 +182,18 @@ void WebSocketManager::sendLoginFrame()
     m_webSocket->sendTextMessage(loginFrame);
     qCInfo(lcWebSocket) << "Login frame sent";
     setState(ConnectionState::LoginSent);
+    armIdleWatchdog();
+    // Reset backoff only after login succeeds — a TCP connect that drops pre-login should keep backing off.
     m_reconnectDelay = RECONNECT_INITIAL_MS;
 }
 
 void WebSocketManager::scheduleReconnect()
 {
+    // Idempotent: onError and onDisconnected both fire for one failure — don't re-arm or double-count the backoff.
+    if (m_reconnectTimer->isActive()) {
+        qCInfo(lcWebSocket) << "Reconnect already scheduled, not re-arming";
+        return;
+    }
     qCInfo(lcWebSocket) << "Scheduling reconnect in" << m_reconnectDelay << "ms";
     m_reconnectTimer->start(m_reconnectDelay);
     m_reconnectDelay = qMin(m_reconnectDelay * 2, RECONNECT_MAX_MS);

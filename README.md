@@ -6,15 +6,33 @@
 
 Unofficial Pushover client for SailfishOS. Real-time notifications via WebSocket, background daemon with systemd integration.
 
-## Deep Sleep
+## Background Delivery & Battery
 
-SailfishOS has no system-level push service. WebSocket connections break in deep sleep. For reliable notifications:
+SailfishOS has no system-level push service, and long-lived WebSocket
+connections do not survive deep sleep (CPU/network suspend). SailPush handles
+this with a **hybrid** approach and does **not** require the global
+`mcetool --set-suspend-policy=early` override, which disables late suspend for
+the entire device and drains battery.
 
-```bash
-mcetool --set-suspend-policy=early
-```
+How it works:
 
-This keeps the CPU and network alive when the screen is off. Without it, notifications arrive when the device wakes up (delayed up to the polling interval).
+- **Screen on:** the daemon holds a persistent WebSocket to Pushover for
+  instant delivery.
+- **Screen off:** the daemon drops the WebSocket and polls Pushover on the
+  configured interval (1–30 min, default 5). Pushover queues messages
+  server-side, so nothing is lost — they arrive on the next poll.
+
+Enable **Keep Connection Alive When Screen Off** in Settings if you want the
+WebSocket kept alive while the screen is off (uses the same per-app keepalive
+for real-time delivery at the cost of higher battery use).
+
+### Limitations
+
+- A plain `QTimer` does not wake the device from deep sleep, so the poll
+  interval only fires while the device is awake. True deep-sleep polling
+  (via libiphb / `Nemo.KeepAlive.BackgroundJob`) is not yet implemented.
+- After a daemon restart, messages that arrived during the previous session
+  may not produce a notification — open the app to review them.
 
 ## Install
 
@@ -35,6 +53,13 @@ Requires Sailfish OS SDK.
 ```bash
 qmake5 && make        # local build
 mb2 build             # RPM build
+```
+
+The unit tests under `tests/` build and run on a regular Linux box with Qt5
+(no Sailfish SDK needed for the pure-Qt suites):
+
+```bash
+cmake -S tests -B tests/build && cmake --build tests/build && ctest --test-dir tests/build
 ```
 
 ## Architecture
