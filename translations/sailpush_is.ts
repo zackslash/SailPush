@@ -331,11 +331,11 @@ Ekki gefinn út eða studdur af Pushover, LLC.</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation>Halda tengingu við þegar skjár er slökktur</translation>
+        <translation>Halda tengingu lifandi þegar skjár er slökktur</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation>Heldur WebSocket við þegar skjár er slökktur fyrir rauntímaafhendingu, í gegnum MCE-keepalive-viðmót per forrit. Meiri rafhlöðunotkun.</translation>
+        <translation>Heldur WebSocket lifandi þegar skjár er slökktur fyrir rauntímaafhendingu, í gegnum MCE-keepalive-viðmót fyrir hvert forrit. Meiri rafhlöðunotkun.</translation>
     </message>
 </context>
 </TS>

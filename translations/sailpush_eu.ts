@@ -335,7 +335,7 @@ Ez da Pushover, LLC-ren argitaratua edo babestua.</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation>Mantendu WebSocket aktibo pantaila itzalita dagoenean denbora errealeko banaketarako, aplikazioko MCE keepalive APIa erabiliz. Bateria-kontsumo handiagoa.</translation>
+        <translation>WebSocket aktibo mantentzen du pantaila itzalita dagoenean denbora errealeko banaketarako, aplikazioko MCE keepalive APIa erabiliz. Bateria-kontsumo handiagoa.</translation>
     </message>
 </context>
 </TS>

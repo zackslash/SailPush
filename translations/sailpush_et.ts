@@ -331,11 +331,11 @@ Ei ole välja antud ega toetatud Pushover, LLC. poolt.</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation>Hoia ühendus elus, kui ekraan on väljas</translation>
+        <translation>Hoia ühendus elus, kui ekraan on välja lülitatud</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation>Hoiab WebSocketi elus, kui ekraan on väljas, reaalajas kohaletoimetamiseks rakendusepõhise MCE-keepalive API kaudu. Suurem akukulu.</translation>
+        <translation>Hoiab WebSocketi elus, kui ekraan on välja lülitatud, reaalajas kohaletoimetamiseks rakendusepõhise MCE-keepalive API kaudu. Suurem akukulu.</translation>
     </message>
 </context>
 </TS>
