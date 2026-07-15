@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Nelze se připojit ke službě na pozadí</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Stáhněte dolů pro synchronizaci</translation>
         <translation>Připojení</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Hluboký spánek</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Povolit záložní dotazování</translation>
     </message>
@@ -291,18 +280,8 @@ Stáhněte dolů pro synchronizaci</translation>
         <translation>Pokud se WebSocket odpojí na 30 sekund, přepne se na periodické dotazování oznámení.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">Udržuje procesor bdělý během synchronizace zpráv pro zajištění spolehlivého doručení. Používá API MCE keepalive.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Odhlásit se</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Poznámka: Pro trvalý WebSocket v hlubokém spánku spusťte:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Interval dotazování</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Zabránit hlubokému spánku během synchronizace</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Není vydáván ani podporován společností Pushover, LLC.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Napájení</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Udržovat připojení při vypnuté obrazovce</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Udržuje WebSocket aktivní při vypnuté obrazovce pro doručování v reálném čase pomocí rozhraní keepalive MCE pro aplikaci. Vyšší spotřeba baterie.</translation>
     </message>
 </context>
 </TS>

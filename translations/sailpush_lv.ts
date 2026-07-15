@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Nevar izveidot savienojumu ar fona servisu</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Velciet lejup, lai sinhronizētu</translation>
         <translation>Savienojums</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Dziļais miegs</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Iespējot polling rezerves variantu</translation>
     </message>
@@ -291,18 +280,8 @@ Velciet lejup, lai sinhronizētu</translation>
         <translation>Ja WebSocket atvienojas uz 30 sekundēm, pāriet uz periodisku polling paziņojumiem.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">Uztur CPU nomodā ziņojumu sinhronizācijas laikā, lai nodrošinātu uzticamu piegādi. Izmanto MCE keepalive API.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Iziet</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Piezīme: Lai iegūtu pastāvīgu WebSocket dziļajā miegā, palaidiet:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Polling intervāls</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Novērst dziļo miegu sinhronizācijas laikā</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Nav izlaists vai atbalstīts no Pushover, LLC.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Barošana</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Uzturēt savienojumu, kad ekrāns izslēgts</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Uztur WebSocket aktīvu, kad ekrāns ir izslēgts, reāllaika piegādei, izmantojot lietotņu MCE keepalive API. Lielāks akumulatora patēriņš.</translation>
     </message>
 </context>
 </TS>

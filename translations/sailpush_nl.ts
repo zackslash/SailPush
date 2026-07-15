@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Kan geen verbinding maken met de achtergrondservice</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Trek omlaag om te synchroniseren</translation>
         <translation>Verbinding</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Diepe slaap</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Polling-reserve inschakelen</translation>
     </message>
@@ -291,18 +280,8 @@ Trek omlaag om te synchroniseren</translation>
         <translation>Als WebSocket 30 seconden wordt verbroken, wordt teruggevallen op periodieke polling voor meldingen.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">Houdt CPU wakker tijdens berichtsynchronisatie om betrouwbare levering te garanderen. Gebruikt MCE keepalive API.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Uitloggen</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Opmerking: Voor persistente WebSocket in diepe slaap, voer uit:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Polling-interval</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Diepe slaap voorkomen tijdens synchronisatie</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Niet uitgebracht of ondersteund door Pushover, LLC.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Energie</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Verbinding actief houden als scherm uit is</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Houdt de WebSocket actief als het scherm uit is voor realtime bezorging, via de per-app MCE-keepalive-API. Hoger accuverbruik.</translation>
     </message>
 </context>
 </TS>

@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Methu cysylltu â&apos;r gwasanaeth cefndir</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Tynnwch i lawr i gydweddu</translation>
         <translation>Cysylltiad</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Cwsg dwfn</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Galluogi polling wrth gefn</translation>
     </message>
@@ -291,18 +280,8 @@ Tynnwch i lawr i gydweddu</translation>
         <translation>Os yw WebSocket yn datgysylltu am 30 eiliad, mae&apos;n dychwelyd i bollinio cyfnodol am hysbysiadau.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">Mae&apos;n cadw&apos;r CPU yn effro yn ystod cydweddu negeseuon i sicrhau dosbarthiad dibynadwy. Mae&apos;n defnyddio API cadw&apos;n fyw MCE.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Allgofnodi</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Nodyn: Ar gyfer WebSocket parhaol mewn cwsg dwfn, rhedwch:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Cyfnod pollinio</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Atal cwsg dwfn yn ystod cydweddu</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Nid yw wedi&apos;i ryddhau neu&apos;i gefnogi gan Pushover, LLC.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Pŵer</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Cadw'r cysylltiad yn fyw pan fydd y sgrin i ffwrdd</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mae'n cadw'r WebSocket yn fyw pan fydd y sgrin i ffwrdd ar gyfer dosbarthu mewn amser real, drwy API keepalive MCE yr ap. Defnydd mwy o fatri.</translation>
     </message>
 </context>
 </TS>

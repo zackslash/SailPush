@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">ფონურ სერვისთან კავშირი შეუძლებელია</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Pull down to sync</source>
         <translation>კავშირი</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">ღრმა ძილი</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Polling სარეზერვოს ჩართვა</translation>
     </message>
@@ -291,18 +280,8 @@ Pull down to sync</source>
         <translation>თუ WebSocket გაითიშება 30 წამით, გადადის პერიოდულ polling-ზე შეტყობინებებისთვის.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">ინარჩუნებს CPU-ს გაღვიძებულს შეტყობინებების სინქრონიზაციის დროს საიმედო მიწოდების უზრუნველსაყოფად. იყენებს MCE keepalive API-ს.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>გასვლა</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">შენიშვნა: ღრმა ძილში მუდმივი WebSocket-ისთვის, გაუშვით:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Polling ინტერვალი</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">ღრმა ძილის თავიდან აცილება სინქრონიზაციის დროს</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Not released or supported by Pushover, LLC.</source>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>კვება</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>კავშირის შენარჩუნება ეკრანის გამორთვისას</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>ინარჩუნებს WebSocket-ს აქტიურს ეკრანის გამორთვისას რეალურ დროში მიწოდებისთვის, თითოეული აპის MCE keepalive API-ს გამოყენებით. მეტი ენერგიის მოხმარება.</translation>
     </message>
 </context>
 </TS>

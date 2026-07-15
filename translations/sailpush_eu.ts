@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Ezin da atzeko planoko zerbitzura konektatu</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Erretiratu behera sinkronizatzeko</translation>
         <translation>Konexioa</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Loti sakona</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Gaitu kontsulta erreserba</translation>
     </message>
@@ -291,18 +280,8 @@ Erretiratu behera sinkronizatzeko</translation>
         <translation>WebSocket-a 30 segundoz deskonektatzen bada, jakinarazpenen kontsulta periodikora aldatzen da.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">CPU-a esna mantentzen du mezuen sinkronizazioan zehar entrega fidagarria bermatzeko. MCE keepalive APIa erabiltzen du.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Saioa itxi</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Oharra: Loti sakonean WebSocket iraunkorrerako, exekutatu:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Kontsulta tartea</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Eragotzi loti sakona sinkronizazioan zehar</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Ez da Pushover, LLC-ren argitaratua edo babestua.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Energia</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Mantendu konexioa pantaila itzalita dagoenean</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mantendu WebSocket aktibo pantaila itzalita dagoenean denbora errealeko banaketarako, aplikazioko MCE keepalive APIa erabiliz. Bateria-kontsumo handiagoa.</translation>
     </message>
 </context>
 </TS>

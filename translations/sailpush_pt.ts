@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Não é possível ligar ao serviço em segundo plano</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Puxe para baixo para sincronizar</translation>
         <translation>Ligação</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Suspensão profunda</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Ativar fallback por polling</translation>
     </message>
@@ -291,18 +280,8 @@ Puxe para baixo para sincronizar</translation>
         <translation>Se o WebSocket for desconectado durante 30 s, muda para polling periódico de notificações.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">Mantém a CPU ativa durante a sincronização de mensagens para garantir a entrega. Usa a API keepalive MCE.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Terminar sessão</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Nota: Para WebSocket persistente em suspensão profunda, execute:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Intervalo de polling</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Impedir suspensão profunda durante a sincronização</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Não publicado nem suportado por Pushover, LLC.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Energia</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Manter ligação com ecrã desligado</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mantém o WebSocket ativo com o ecrã desligado para entrega em tempo real, através da API de keepalive MCE por aplicação. Maior consumo de bateria.</translation>
     </message>
 </context>
 </TS>

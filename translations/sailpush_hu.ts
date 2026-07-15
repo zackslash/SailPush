@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Nem lehet csatlakozni a háttérszolgáltatáshoz</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Húzza le a szinkronizáláshoz</translation>
         <translation>Kapcsolat</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Mély alvás</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Polling tartalék engedélyezése</translation>
     </message>
@@ -291,18 +280,8 @@ Húzza le a szinkronizáláshoz</translation>
         <translation>Ha a WebSocket 30 másodpercig bontva van, időszakos pollingra vált az értesítésekhez.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">A CPU-t ébren tartja az üzenetek szinkronizálása során a megbízható kézbesítés érdekében. MCE keepalive API-t használ.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Kijelentkezés</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Megjegyzés: Tartós WebSocket-hez mély alvásban futtassa:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Polling időköz</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Mély alvás megakadályozása szinkronizálás közben</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Nem a Pushover, LLC. adta ki vagy támogatja.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Áramellátás</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Kapcsolat fenntartása képernyő kikapcsolásakor</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktívan tartja a WebSocketet képernyő kikapcsolásakor a valós idejű kézbesítéshez, az alkalmazásonkénti MCE-keepalive API-n keresztül. Magasabb akkumulátorhasználat.</translation>
     </message>
 </context>
 </TS>

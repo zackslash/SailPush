@@ -43,13 +43,6 @@
     </message>
 </context>
 <context>
-    <name>DaemonConnector</name>
-    <message>
-        <source>Cannot connect to background service</source>
-        <translation type="vanished">Ní féidir ceangal a dhéanamh leis an tseirbhís cúlra</translation>
-    </message>
-</context>
-<context>
     <name>LoginHelper</name>
     <message>
         <source>App was upgraded — saved credentials use an older format and cannot be migrated. Please log in again.</source>
@@ -279,10 +272,6 @@ Tarraing anuas le sioncronú</translation>
         <translation>Ceangal</translation>
     </message>
     <message>
-        <source>Deep Sleep</source>
-        <translation type="vanished">Codladh domhain</translation>
-    </message>
-    <message>
         <source>Enable Polling Fallback</source>
         <translation>Cumasaigh polling cúltaca</translation>
     </message>
@@ -291,18 +280,8 @@ Tarraing anuas le sioncronú</translation>
         <translation>Má dhícheanglaíonn WebSocket ar feadh 30 soicind, filleann sé ar polling tréimhsiúil le haghaidh fógraí.</translation>
     </message>
     <message>
-        <source>Keeps CPU awake during message sync to ensure reliable delivery. Uses MCE keepalive API.</source>
-        <translation type="vanished">Coimeádann sé an CPU dúscailte le linn sioncronaithe teachtaireachtaí chun seachadadh iontaofa a chinntiú. Úsáideann sé API MCE keepalive.</translation>
-    </message>
-    <message>
         <source>Logout</source>
         <translation>Logáil amach</translation>
-    </message>
-    <message>
-        <source>Note: For persistent WebSocket in deep sleep, run:
-mcetool --set-suspend-policy=early</source>
-        <translation type="vanished">Nóta: Le haghaidh WebSocket buan i gcodladh domhain, rith:
-mcetool --set-suspend-policy=early</translation>
     </message>
     <message>
         <source>Notifications</source>
@@ -315,10 +294,6 @@ mcetool --set-suspend-policy=early</translation>
     <message>
         <source>Polling Interval</source>
         <translation>Eatramh polling</translation>
-    </message>
-    <message>
-        <source>Prevent Deep Sleep During Sync</source>
-        <translation type="vanished">Cosc a chur ar chodladh domhain le linn sioncronaithe</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -352,15 +327,15 @@ Níl sé scaoilte nó tacaíocht ag Pushover, LLC.</translation>
     </message>
     <message>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Cumhacht</translation>
     </message>
     <message>
         <source>Keep Connection Alive When Screen Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Coinnigh an nasc beo nuair atá an scáileán múchta</translation>
     </message>
     <message>
         <source>Keeps the WebSocket alive while the screen is off for real-time delivery, using the per-app MCE keepalive API. Higher battery use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Coimeád an WebSocket beo agus an scáileán múchta le haghaidh seachadta in am fíor, tríd an API keepalive MCE in aghaidh an aipe. Úsáid níos mó ceallraí.</translation>
     </message>
 </context>
 </TS>
